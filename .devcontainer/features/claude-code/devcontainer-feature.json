@@ -1,0 +1,16 @@
+{
+    "name": "Claude Code CLI",
+    "id": "claude-code",
+    "version": "0.0.2",
+    "description": "Install Claude Code CLI using native installer",
+    "options": {
+        "version": {
+            "type": "string",
+            "default": "latest",
+            "description": "Claude Code version to install (version number, 'latest', or 'stable')"
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}

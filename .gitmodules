@@ -1,0 +1,6 @@
+[submodule "modules/flatbuffers"]
+	path = modules/flatbuffers
+	url = https://github.com/TheCBaH/flatbuffers.git
+[submodule "modules/tflite-micro"]
+	path = modules/tflite-micro
+	url = https://github.com/tensorflow/tflite-micro.git

@@ -1,0 +1,42 @@
+name: OCaml Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: devcontainer
+      uses: ./.github/workflows/actions/devcontainer
+      id: devcontainer
+    - name: setup
+      run: |
+        echo 'EXEC=${{ steps.devcontainer.outputs.exec }}' >> $GITHUB_ENV
+    - name: build flatc
+      run: |
+        ${{ env.EXEC }} make flatc
+    - name: install ocaml deps
+      run: |
+        ${{ env.EXEC }} bash -c '. /etc/bash.bashrc && sudo OPAMROOT=$OPAMROOT make deps'
+    - name: test flatbuffers
+      run: |
+        ${{ env.EXEC }} make -C modules/flatbuffers test
+    - name: benchmark flatbuffers
+      run: |
+        ${{ env.EXEC }} make -C modules/flatbuffers bench
+    - name: build tfview
+      run: |
+        ${{ env.EXEC }} make build
+    - name: download test model
+      run: |
+        ${{ env.EXEC }} make download
+    - name: run tfview
+      run: |
+        ${{ env.EXEC }} make run
