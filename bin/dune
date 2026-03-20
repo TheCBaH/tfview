@@ -1,0 +1,3 @@
+(executable
+ (name tfview)
+ (libraries tflite_schema flatbuffers))

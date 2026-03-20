@@ -1,0 +1,3 @@
+(library
+ (name tflite_schema)
+ (libraries flatbuffers))
