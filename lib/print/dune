@@ -1,0 +1,4 @@
+(library
+ (name tfview_print)
+ (wrapped false)
+ (libraries tflite_schema flatbuffers))

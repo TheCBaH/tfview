@@ -28,7 +28,7 @@ generate-check: generate
 	fi
 	@echo "Generated schema files are up to date"
 
-FMT_DIRS := bin
+FMT_DIRS := bin lib/print
 
 fmt:
 	opam exec -- dune build $(addprefix @,$(addsuffix /fmt,$(FMT_DIRS))) --auto-promote

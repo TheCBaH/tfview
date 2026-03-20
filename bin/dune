@@ -1,4 +1,4 @@
 (executable
  (name tfview)
  (modes exe js)
- (libraries tflite_schema flatbuffers))
+ (libraries tfview_print))
