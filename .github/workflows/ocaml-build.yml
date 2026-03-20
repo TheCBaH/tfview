@@ -43,3 +43,6 @@ jobs:
     - name: test jsoo target
       run: |
         ${{ env.EXEC }} make test-jsoo
+    - name: build web-jsoo target
+      run: |
+        ${{ env.EXEC }} make build-web-jsoo

@@ -1,0 +1,6 @@
+(executable
+ (name tfview_web)
+ (modes js)
+ (libraries tfview_print js_of_ocaml)
+ (preprocess
+  (pps js_of_ocaml-ppx)))

@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo print clean
+.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo print clean
 
 all: build
 
@@ -28,7 +28,7 @@ generate-check: generate
 	fi
 	@echo "Generated schema files are up to date"
 
-FMT_DIRS := bin lib/print
+FMT_DIRS := bin lib/print web-jsoo
 
 fmt:
 	opam exec -- dune build $(addprefix @,$(addsuffix /fmt,$(FMT_DIRS))) --auto-promote
@@ -38,6 +38,9 @@ fmt-check:
 
 build:
 	opam exec -- dune build --ignore-promoted-rules
+
+build-web-jsoo:
+	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
 
 download:
 	mkdir -p $(MODEL_DIR)
