@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build flatc deps generate generate-check fmt fmt-check download run print clean
+.PHONY: all build flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo print clean
 
 all: build
 
@@ -49,6 +49,15 @@ download:
 
 run: $(MODEL)
 	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL)
+
+run-jsoo: $(MODEL)
+	node _build/default/bin/tfview.bc.js $(MODEL)
+
+test-jsoo: $(MODEL)
+	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
+	node _build/default/bin/tfview.bc.js $(MODEL) > _build/actual_jsoo.txt
+	diff _build/expected.txt _build/actual_jsoo.txt
+	@echo "jsoo output matches native"
 
 print: run
 
