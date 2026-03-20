@@ -1,0 +1,16 @@
+{
+    "name": "npm packages",
+    "id": "npm",
+    "version": "0.0.1",
+    "description": "Install npm and global Node.js packages",
+    "options": {
+        "packages": {
+            "type": "string",
+            "default": "",
+            "description": "Space-separated list of npm packages to install globally"
+        }
+    },
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}

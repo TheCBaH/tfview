@@ -15,7 +15,10 @@
         "./features/ocaml": {
             "packages": "bigstringaf cppo alcotest memtrace benchmark js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx"
         },
-        "./features/gh": {}
+        "./features/gh": {},
+        "./features/npm": {
+            "packages": "jsdom@24"
+        }
     },
     "customizations": {
         "vscode": {

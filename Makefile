@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo print clean
+.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo test-web-jsoo print clean
 
 all: build
 
@@ -61,6 +61,17 @@ test-jsoo: $(MODEL)
 	node _build/default/bin/tfview.bc.js $(MODEL) > _build/actual_jsoo.txt
 	diff _build/expected.txt _build/actual_jsoo.txt
 	@echo "jsoo output matches native"
+
+NODE_PATH := $(shell node -e "console.log(require('child_process').execSync('npm root -g').toString().trim())")
+
+test-web-jsoo: $(MODEL)
+	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
+	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
+	node web-jsoo/test_web.js $(MODEL) api > _build/actual_web_jsoo.txt
+	diff _build/expected.txt _build/actual_web_jsoo.txt
+	@echo "web-jsoo API output matches native"
+	NODE_PATH=$(NODE_PATH) node web-jsoo/test_web.js $(MODEL) dom _build/expected.txt
+	@echo "web-jsoo DOM test passed"
 
 print: run
 
