@@ -4,3 +4,15 @@
  (libraries tfview_print js_of_ocaml)
  (preprocess
   (pps js_of_ocaml-ppx)))
+
+(copy_files
+ (files static/*.html))
+
+(rule
+ (alias serve)
+ (deps index.html tfview_web.bc.js serve.js)
+ (action
+  (setenv
+   SERVE_DIR
+   .
+   (run node serve.js 0.0.0.0 8080))))

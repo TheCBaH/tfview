@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo test-web-jsoo print clean
+.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo test-web-jsoo test-web-jsoo-browser serve-web-jsoo print clean
 
 all: build
 
@@ -72,6 +72,15 @@ test-web-jsoo: $(MODEL)
 	@echo "web-jsoo API output matches native"
 	NODE_PATH=$(NODE_PATH) node web-jsoo/test_web.js $(MODEL) dom _build/expected.txt
 	@echo "web-jsoo DOM test passed"
+
+test-web-jsoo-browser: $(MODEL)
+	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
+	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
+	NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} node web-jsoo/test_browser.js $(MODEL) _build/expected.txt
+	@echo "web-jsoo browser test passed"
+
+serve-web-jsoo:
+	opam exec -- dune build --ignore-promoted-rules @web-jsoo/serve
 
 print: run
 

@@ -17,7 +17,8 @@
         },
         "./features/gh": {},
         "./features/npm": {
-            "packages": "jsdom@24"
+            "packages": "jsdom@24",
+            "playwright": true
         }
     },
     "customizations": {

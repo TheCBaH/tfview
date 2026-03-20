@@ -46,3 +46,6 @@ jobs:
     - name: test web-jsoo target
       run: |
         ${{ env.EXEC }} make test-web-jsoo
+    - name: test web-jsoo browser
+      run: |
+        ${{ env.EXEC }} make test-web-jsoo-browser

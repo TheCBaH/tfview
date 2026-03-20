@@ -12,7 +12,7 @@ if (mode === "api") {
   const { JSDOM } = require("jsdom");
   const expectedPath = process.argv[4];
 
-  const html = fs.readFileSync("web-jsoo/index.html", "utf8");
+  const html = fs.readFileSync("web-jsoo/static/index.html", "utf8");
   const bundleJs = fs.readFileSync(
     "_build/default/web-jsoo/tfview_web.bc.js", "utf8"
   );

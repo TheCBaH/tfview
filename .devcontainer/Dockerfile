@@ -9,7 +9,6 @@ RUN set -eux;\
   g++\
   git\
   make\
-  nodejs\
   ripgrep\
   wget\
   xxd\
