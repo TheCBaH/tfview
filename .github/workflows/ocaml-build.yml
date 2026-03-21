@@ -48,6 +48,9 @@ jobs:
     - name: run tfview
       run: |
         ${{ env.EXEC }} make run
+    - name: test melange target
+      run: |
+        ${{ env.EXEC }} make test-melange
     - name: test jsoo target
       run: |
         ${{ env.EXEC }} make test-jsoo

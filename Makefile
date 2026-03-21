@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo test-jsoo test-web-jsoo test-web-jsoo-browser test-models serve-web-jsoo print clean
+.PHONY: all build build-web-jsoo build-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-models serve-web-jsoo print clean
 
 all: build
 
@@ -28,7 +28,7 @@ generate-check: generate
 	fi
 	@echo "Generated schema files are up to date"
 
-FMT_DIRS := bin lib/print web-jsoo
+FMT_DIRS := bin lib/print web-jsoo web-melange
 
 fmt:
 	opam exec -- dune build $(addprefix @,$(addsuffix /fmt,$(FMT_DIRS))) --auto-promote
@@ -41,6 +41,9 @@ build:
 
 build-web-jsoo:
 	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
+
+build-melange:
+	opam exec -- dune build @melange
 
 download:
 	mkdir -p $(MODEL_DIR)
@@ -72,6 +75,9 @@ run: $(MODEL)
 run-jsoo: $(MODEL)
 	node _build/default/bin/tfview.bc.js $(MODEL)
 
+run-melange: $(MODEL)
+	node _build/default/web-melange/output/web-melange/tfview_mel.js $(MODEL)
+
 test-jsoo: $(MODEL)
 	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
 	node _build/default/bin/tfview.bc.js $(MODEL) > _build/actual_jsoo.txt
@@ -79,6 +85,18 @@ test-jsoo: $(MODEL)
 	@echo "jsoo output matches native"
 
 NODE_PATH := $(shell node -e "console.log(require('child_process').execSync('npm root -g').toString().trim())")
+
+test-melange: build-melange
+	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+	@mkdir -p $(TEST_MODEL_DIR)
+	@for m in $(ALL_MODELS); do \
+		name=$$(basename "$$m" .tflite); \
+		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
+		node _build/default/web-melange/output/web-melange/tfview_mel.js $$m > $(TEST_MODEL_DIR)/$$name.melange.txt || exit 1; \
+		diff $(TEST_MODEL_DIR)/$$name.native.txt $(TEST_MODEL_DIR)/$$name.melange.txt || { echo "FAIL: $$name melange output differs from native"; exit 1; }; \
+		echo "OK: $$name"; \
+	done
+	@echo "All models: melange output matches native"
 
 test-web-jsoo: $(MODEL)
 	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
