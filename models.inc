@@ -34,3 +34,16 @@ download-models: download
 	@# text_classification (direct .tflite, 0.8MB)
 	curl -sL --fail -o $(MODEL_DIR)/text_classification.tflite \
 		"https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification.tflite"
+	@# Android MLTS models from googlesource (base64-encoded, new ops: hard_swish, lstm, rnn, log_softmax)
+	@# mobilenet_v3 (10MB - adds hard_swish)
+	curl -sL --fail \
+		"https://android.googlesource.com/platform/test/mlts/models/+/refs/heads/main/assets/mobilenet_v3-small_224_1.0_float.tflite?format=TEXT" \
+		| base64 -d > $(MODEL_DIR)/mobilenet_v3-small_224_1.0_float.tflite
+	@# asr_float (19MB - adds lstm, log_softmax)
+	curl -sL --fail \
+		"https://android.googlesource.com/platform/test/mlts/models/+/refs/heads/main/assets/asr_float.tflite?format=TEXT" \
+		| base64 -d > $(MODEL_DIR)/asr_float.tflite
+	@# tts_float (1.4MB - adds rnn)
+	curl -sL --fail \
+		"https://android.googlesource.com/platform/test/mlts/models/+/refs/heads/main/assets/tts_float.tflite?format=TEXT" \
+		| base64 -d > $(MODEL_DIR)/tts_float.tflite
