@@ -48,4 +48,11 @@ if grep -q "<unknown>" "$file"; then
   fail "output contains <unknown> nodes"
 fi
 
+# No unparsed builtin options (lines like "      <some_options>")
+unparsed=$(grep -c '^ *<.*_options>' "$file" || true)
+if [ "$unparsed" -gt 0 ]; then
+  examples=$(grep '^ *<.*_options>' "$file" | sort -u | head -5 | tr '\n' ' ')
+  fail "unparsed builtin options ($unparsed): $examples"
+fi
+
 echo "OK [$name]: $op_code_count op_codes, $op_count operators, $tensor_count tensors"

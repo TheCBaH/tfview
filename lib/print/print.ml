@@ -75,6 +75,65 @@ let bprint_builtin_options buf b op =
     ~add_options:(fun o ->
       Printf.bprintf buf "      %s\n"
         (string_of_activation (AddOptions.fused_activation_function b o)))
+    ~mul_options:(fun o ->
+      Printf.bprintf buf "      %s\n"
+        (string_of_activation (MulOptions.fused_activation_function b o)))
+    ~sub_options:(fun o ->
+      Printf.bprintf buf "      pot_scale_int16=%b%s\n"
+        (SubOptions.pot_scale_int16 b o)
+        (string_of_activation (SubOptions.fused_activation_function b o)))
+    ~gather_options:(fun o ->
+      Printf.bprintf buf "      axis=%ld batch_dims=%ld\n"
+        (GatherOptions.axis b o) (GatherOptions.batch_dims b o))
+    ~pack_options:(fun o ->
+      Printf.bprintf buf "      values_count=%ld axis=%ld\n"
+        (PackOptions.values_count b o) (PackOptions.axis b o))
+    ~unpack_options:(fun o ->
+      Printf.bprintf buf "      num=%ld axis=%ld\n"
+        (UnpackOptions.num b o) (UnpackOptions.axis b o))
+    ~cast_options:(fun o ->
+      Printf.bprintf buf "      in_data_type=%s out_data_type=%s\n"
+        (TensorType.to_string (CastOptions.in_data_type b o))
+        (TensorType.to_string (CastOptions.out_data_type b o)))
+    ~resize_bilinear_options:(fun o ->
+      Printf.bprintf buf "      align_corners=%b half_pixel_centers=%b\n"
+        (ResizeBilinearOptions.align_corners b o)
+        (ResizeBilinearOptions.half_pixel_centers b o))
+    ~strided_slice_options:(fun o ->
+      Printf.bprintf buf
+        "      begin_mask=%ld end_mask=%ld ellipsis_mask=%ld \
+         new_axis_mask=%ld shrink_axis_mask=%ld\n"
+        (StridedSliceOptions.begin_mask b o)
+        (StridedSliceOptions.end_mask b o)
+        (StridedSliceOptions.ellipsis_mask b o)
+        (StridedSliceOptions.new_axis_mask b o)
+        (StridedSliceOptions.shrink_axis_mask b o))
+    ~reducer_options:(fun o ->
+      Printf.bprintf buf "      keep_dims=%b\n"
+        (ReducerOptions.keep_dims b o))
+    ~skip_gram_options:(fun o ->
+      Printf.bprintf buf
+        "      ngram_size=%ld max_skip_size=%ld include_all_ngrams=%b\n"
+        (SkipGramOptions.ngram_size b o)
+        (SkipGramOptions.max_skip_size b o)
+        (SkipGramOptions.include_all_ngrams b o))
+    ~lshprojection_options:(fun o ->
+      Printf.bprintf buf "      type=%s\n"
+        (LshprojectionType.to_string (LshprojectionOptions.type_ b o)))
+    ~lstmoptions:(fun o ->
+      Printf.bprintf buf
+        "      kernel_type=%s cell_clip=%g proj_clip=%g%s\n"
+        (LstmkernelType.to_string (Lstmoptions.kernel_type b o))
+        (Lstmoptions.cell_clip b o)
+        (Lstmoptions.proj_clip b o)
+        (string_of_activation (Lstmoptions.fused_activation_function b o)))
+    ~rnnoptions:(fun o ->
+      Printf.bprintf buf "      %s\n"
+        (string_of_activation (Rnnoptions.fused_activation_function b o)))
+    ~transpose_options:(fun _o -> Printf.bprintf buf "")
+    ~pad_options:(fun _o -> Printf.bprintf buf "")
+    ~log_softmax_options:(fun _o -> Printf.bprintf buf "")
+    ~hard_swish_options:(fun _o -> Printf.bprintf buf "")
     ~default:(fun tag ->
       let name = BuiltinOptions.to_string tag in
       if name <> "none" then Printf.bprintf buf "      <%s>\n" name)
