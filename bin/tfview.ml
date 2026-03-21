@@ -4,7 +4,7 @@ let read_file path =
   let buf = Bytes.create n in
   really_input ic buf 0 n;
   close_in ic;
-  Bytes.to_string buf
+  buf
 
 let () =
   if Array.length Sys.argv < 2 then (
