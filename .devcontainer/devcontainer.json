@@ -17,7 +17,7 @@
         },
         "./features/gh": {},
         "./features/npm": {
-            "packages": "jsdom@24 pixelmatch@5 pngjs",
+            "packages": "jsdom pixelmatch pngjs",
             "playwright": true
         }
     },
