@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>tfview (melange)</title>
+<title>tfview</title>
 <style>
   body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
   h1 { font-size: 1.5rem; }
@@ -14,13 +14,13 @@
 </style>
 </head>
 <body>
-<h1>tfview <small>(melange)</small></h1>
+<h1>tfview</h1>
 <div class="controls">
   <input type="file" id="file" accept=".tflite">
   <button id="download" disabled>Download as text</button>
 </div>
 <pre id="output">Select a .tflite file to view its structure.</pre>
-<script src="tfview_mel_web.bundle.js"></script>
+<script src="tfview.js"></script>
 <script>
 (function() {
   var fileInput = document.getElementById('file');
