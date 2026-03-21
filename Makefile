@@ -78,11 +78,17 @@ run-jsoo: $(MODEL)
 run-melange: $(MODEL)
 	node _build/default/web-melange/output/web-melange/tfview_mel.js $(MODEL)
 
-test-jsoo: $(MODEL)
-	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
-	node _build/default/bin/tfview.bc.js $(MODEL) > _build/actual_jsoo.txt
-	diff _build/expected.txt _build/actual_jsoo.txt
-	@echo "jsoo output matches native"
+test-jsoo: build
+	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+	@mkdir -p $(TEST_MODEL_DIR)
+	@for m in $(ALL_MODELS); do \
+		name=$$(basename "$$m" .tflite); \
+		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
+		node _build/default/bin/tfview.bc.js $$m > $(TEST_MODEL_DIR)/$$name.jsoo.txt || exit 1; \
+		diff $(TEST_MODEL_DIR)/$$name.native.txt $(TEST_MODEL_DIR)/$$name.jsoo.txt || { echo "FAIL: $$name jsoo output differs from native"; exit 1; }; \
+		echo "OK: $$name"; \
+	done
+	@echo "All models: jsoo output matches native"
 
 NODE_PATH := $(shell node -e "console.log(require('child_process').execSync('npm root -g').toString().trim())")
 
