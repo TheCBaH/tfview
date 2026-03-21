@@ -10,6 +10,7 @@ RUN set -eux;\
   git\
   make\
   ripgrep\
+  time\
   wget\
   xxd\
   xz-utils\
