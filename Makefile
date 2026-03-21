@@ -6,7 +6,7 @@ MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 DL = tools/download-model.sh $(MODEL_DIR)
 
-.PHONY: all build build-web-jsoo build-melange build-web-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-web-melange test-web-melange-browser test-models check-models serve-web-jsoo serve-web-melange print clean
+.PHONY: all build build-web-jsoo build-melange build-web-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-web-melange test-web-melange-browser test-models check-models update-golden serve-web-jsoo serve-web-melange print clean
 
 all: build
 
@@ -152,6 +152,16 @@ test-web-melange-browser: build-web-melange check-models
 		echo "OK: $$name"; \
 	done
 	@echo "All models: web-melange browser output matches native"
+
+update-golden: build check-models
+	@mkdir -p $(TEST_MODEL_DIR)
+	@for m in $(ALL_MODELS); do \
+		name=$$(basename "$$m" .tflite); \
+		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
+		UPDATE_GOLDEN=1 SERVE_DIR=$(JSOO_WEB_DIR) NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} $(TIME) node web/test_browser.js $$m $(TEST_MODEL_DIR)/$$name.native.txt || { echo "FAIL: $$name golden update"; exit 1; }; \
+		echo "OK: $$name"; \
+	done
+	@echo "All golden screenshots updated"
 
 serve-web-melange: build-web-melange
 	SERVE_DIR=$(MELANGE_WEB_DIR)/static node web/serve.js 0.0.0.0 8080
