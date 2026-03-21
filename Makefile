@@ -4,7 +4,7 @@ MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 DL = tools/download-model.sh $(MODEL_DIR)
 
-.PHONY: all build build-web-jsoo build-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-models serve-web-jsoo print clean
+.PHONY: all build build-web-jsoo build-melange build-web-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-web-melange test-web-melange-browser test-models serve-web-jsoo serve-web-melange print clean
 
 all: build
 
@@ -43,8 +43,16 @@ build:
 build-web-jsoo:
 	opam exec -- dune build --ignore-promoted-rules web-jsoo/tfview_web.bc.js
 
+MELANGE_WEB_DIR := _build/default/web-melange/web
+MELANGE_WEB_BUNDLE := $(MELANGE_WEB_DIR)/static/tfview_mel_web.bundle.js
+
 build-melange:
 	opam exec -- dune build @melange
+
+build-web-melange: build-melange
+	printf 'var m=require("./output/web-melange/web/tfview_mel_web.js");window.tfview={parse:m.parse};\n' > $(MELANGE_WEB_DIR)/entry.js
+	npx esbuild $(MELANGE_WEB_DIR)/entry.js --bundle --outfile=$(MELANGE_WEB_BUNDLE)
+	cp web-melange/web/static/index.html $(MELANGE_WEB_DIR)/static/
 
 download:
 	@$(DL) tgz mobilenet_v1_1.0_224.tflite \
@@ -116,6 +124,22 @@ test-web-jsoo-browser: $(MODEL)
 	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
 	NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} node web-jsoo/test_browser.js $(MODEL) _build/expected.txt
 	@echo "web-jsoo browser test passed"
+
+test-web-melange: build-web-melange $(MODEL)
+	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
+	node web-melange/web/test_web.js $(MODEL) api > _build/actual_web_melange.txt
+	diff _build/expected.txt _build/actual_web_melange.txt
+	@echo "web-melange API output matches native"
+	NODE_PATH=$(NODE_PATH) node web-melange/web/test_web.js $(MODEL) dom _build/expected.txt
+	@echo "web-melange DOM test passed"
+
+test-web-melange-browser: build-web-melange $(MODEL)
+	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL) > _build/expected.txt
+	NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} node web-melange/web/test_browser.js $(MODEL) _build/expected.txt
+	@echo "web-melange browser test passed"
+
+serve-web-melange: build-web-melange
+	SERVE_DIR=_build/default/web-melange/web/static node web-jsoo/serve.js
 
 serve-web-jsoo:
 	opam exec -- dune build --ignore-promoted-rules @web-jsoo/serve
