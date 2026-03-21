@@ -3,7 +3,7 @@ FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 
-.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download run run-jsoo test-jsoo test-web-jsoo test-web-jsoo-browser serve-web-jsoo print clean
+.PHONY: all build build-web-jsoo flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo test-jsoo test-web-jsoo test-web-jsoo-browser test-models serve-web-jsoo print clean
 
 all: build
 
@@ -49,6 +49,22 @@ download:
 		--fail
 	cd $(MODEL_DIR) && tar xzf mobilenet_v1_1.0_224.tgz ./mobilenet_v1_1.0_224.tflite
 	rm -f $(MODEL_DIR)/mobilenet_v1_1.0_224.tgz
+
+include models.inc
+
+ALL_MODELS := $(wildcard $(MODEL_DIR)/*.tflite)
+
+TEST_MODEL_DIR := _build/models
+
+test-models: build
+	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+	@mkdir -p $(TEST_MODEL_DIR)
+	@for m in $(ALL_MODELS); do \
+		name=$$(basename "$$m" .tflite); \
+		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.txt || exit 1; \
+		tools/verify-model-output.sh $(TEST_MODEL_DIR)/$$name.txt || exit 1; \
+	done
+	@echo "All models parsed successfully"
 
 run: $(MODEL)
 	opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $(MODEL)
