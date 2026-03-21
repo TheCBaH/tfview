@@ -2,6 +2,7 @@ SCHEMA := modules/tflite-micro/tensorflow/compiler/mlir/lite/schema/schema.fbs
 FLATC := modules/flatbuffers/flatc
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
+DL = tools/download-model.sh $(MODEL_DIR)
 
 .PHONY: all build build-web-jsoo build-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-models serve-web-jsoo print clean
 
@@ -46,12 +47,9 @@ build-melange:
 	opam exec -- dune build @melange
 
 download:
-	mkdir -p $(MODEL_DIR)
-	curl -L -o $(MODEL_DIR)/mobilenet_v1_1.0_224.tgz \
+	@$(DL) tgz mobilenet_v1_1.0_224.tflite \
 		"https://storage.googleapis.com/download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz" \
-		--fail
-	cd $(MODEL_DIR) && tar xzf mobilenet_v1_1.0_224.tgz ./mobilenet_v1_1.0_224.tflite
-	rm -f $(MODEL_DIR)/mobilenet_v1_1.0_224.tgz
+		./mobilenet_v1_1.0_224.tflite
 
 include models.inc
 
