@@ -51,6 +51,12 @@ jobs:
     - name: test melange target
       run: |
         ${{ env.EXEC }} make test-melange
+    - name: test web-melange target
+      run: |
+        ${{ env.EXEC }} make test-web-melange
+    - name: test web-melange browser
+      run: |
+        ${{ env.EXEC }} make test-web-melange-browser
     - name: test jsoo target
       run: |
         ${{ env.EXEC }} make test-jsoo
