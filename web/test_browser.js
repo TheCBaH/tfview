@@ -2,7 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
 const { PNG } = require("pngjs");
-const pixelmatch = require("pixelmatch");
+const _pm = require("pixelmatch");
+const pixelmatch = typeof _pm === "function" ? _pm : _pm.default;
 
 // SERVE_DIR must point to directory with index.html and tfview.js
 const serveDir = process.env.SERVE_DIR;
