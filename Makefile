@@ -6,7 +6,7 @@ MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
 DL = tools/download-model.sh $(MODEL_DIR)
 
-.PHONY: all build build-web-jsoo build-melange build-web-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-web-melange test-web-melange-browser test-models serve-web-jsoo serve-web-melange print clean
+.PHONY: all build build-web-jsoo build-melange build-web-melange flatc deps generate generate-check fmt fmt-check download download-models run run-jsoo run-melange test-jsoo test-web-jsoo test-web-jsoo-browser test-melange test-web-melange test-web-melange-browser test-models check-models serve-web-jsoo serve-web-melange print clean
 
 all: build
 
@@ -48,9 +48,6 @@ build-web-jsoo:
 JSOO_WEB_DIR := _build/default/web-jsoo
 MELANGE_WEB_DIR := _build/default/web-melange/web
 
-# Small models for browser/DOM tests (under ~5MB, good feature coverage)
-WEB_TEST_MODELS := $(addprefix $(MODEL_DIR)/,text_classification.tflite deeplabv3_257_mv_gpu.tflite mobilenet_v2_1.0_224_quant.tflite detect.tflite)
-
 build-melange:
 	opam exec -- dune build @melange
 
@@ -67,12 +64,14 @@ download:
 
 include models.inc
 
-ALL_MODELS := $(wildcard $(MODEL_DIR)/*.tflite)
+ALL_MODELS = $(wildcard $(MODEL_DIR)/*.tflite)
 
 TEST_MODEL_DIR := _build/models
 
-test-models: build
+check-models:
 	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+
+test-models: build check-models
 	@mkdir -p $(TEST_MODEL_DIR)
 	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
@@ -90,8 +89,7 @@ run-jsoo: $(MODEL)
 run-melange: $(MODEL)
 	node _build/default/web-melange/output/web-melange/tfview_mel.js $(MODEL)
 
-test-jsoo: build
-	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+test-jsoo: build check-models
 	@mkdir -p $(TEST_MODEL_DIR)
 	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
@@ -104,8 +102,7 @@ test-jsoo: build
 
 NODE_PATH := $(shell node -e "console.log(require('child_process').execSync('npm root -g').toString().trim())")
 
-test-melange: build-melange
-	@if [ -z "$(ALL_MODELS)" ]; then echo "No models found in $(MODEL_DIR)/"; exit 1; fi
+test-melange: build-melange check-models
 	@mkdir -p $(TEST_MODEL_DIR)
 	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
@@ -116,9 +113,9 @@ test-melange: build-melange
 	done
 	@echo "All models: melange output matches native"
 
-test-web-jsoo: build
+test-web-jsoo: build check-models
 	@mkdir -p $(TEST_MODEL_DIR)
-	@for m in $(WEB_TEST_MODELS); do \
+	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
 		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
 		SERVE_DIR=$(JSOO_WEB_DIR) NODE_PATH=$(NODE_PATH) $(TIME) node web/test_web.js $$m dom $(TEST_MODEL_DIR)/$$name.native.txt || { echo "FAIL: $$name web-jsoo DOM"; exit 1; }; \
@@ -126,9 +123,9 @@ test-web-jsoo: build
 	done
 	@echo "All models: web-jsoo DOM output matches native"
 
-test-web-jsoo-browser: build
+test-web-jsoo-browser: build check-models
 	@mkdir -p $(TEST_MODEL_DIR)
-	@for m in $(WEB_TEST_MODELS); do \
+	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
 		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
 		SERVE_DIR=$(JSOO_WEB_DIR) NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} $(TIME) node web/test_browser.js $$m $(TEST_MODEL_DIR)/$$name.native.txt || { echo "FAIL: $$name web-jsoo browser"; exit 1; }; \
@@ -136,9 +133,9 @@ test-web-jsoo-browser: build
 	done
 	@echo "All models: web-jsoo browser output matches native"
 
-test-web-melange: build-web-melange
+test-web-melange: build-web-melange check-models
 	@mkdir -p $(TEST_MODEL_DIR)
-	@for m in $(WEB_TEST_MODELS); do \
+	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
 		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
 		SERVE_DIR=$(MELANGE_WEB_DIR)/static NODE_PATH=$(NODE_PATH) $(TIME) node web/test_web.js $$m dom $(TEST_MODEL_DIR)/$$name.native.txt || { echo "FAIL: $$name web-melange DOM"; exit 1; }; \
@@ -146,9 +143,9 @@ test-web-melange: build-web-melange
 	done
 	@echo "All models: web-melange DOM output matches native"
 
-test-web-melange-browser: build-web-melange
+test-web-melange-browser: build-web-melange check-models
 	@mkdir -p $(TEST_MODEL_DIR)
-	@for m in $(WEB_TEST_MODELS); do \
+	@for m in $(ALL_MODELS); do \
 		name=$$(basename "$$m" .tflite); \
 		opam exec -- dune exec --ignore-promoted-rules bin/tfview.exe -- $$m > $(TEST_MODEL_DIR)/$$name.native.txt || exit 1; \
 		SERVE_DIR=$(MELANGE_WEB_DIR)/static NODE_PATH=$(NODE_PATH) PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/usr/local/ms-playwright} $(TIME) node web/test_browser.js $$m $(TEST_MODEL_DIR)/$$name.native.txt || { echo "FAIL: $$name web-melange browser"; exit 1; }; \

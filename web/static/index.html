@@ -34,11 +34,13 @@
     output.textContent = 'Loading...';
     var reader = new FileReader();
     reader.onload = function(ev) {
+      // TODO: pass Uint8Array directly to OCaml without string conversion
       var bytes = new Uint8Array(ev.target.result);
-      var binaryStr = '';
-      for (var i = 0; i < bytes.length; i++) {
-        binaryStr += String.fromCharCode(bytes[i]);
+      var chunks = [];
+      for (var i = 0; i < bytes.length; i += 65534) {
+        chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 65534)));
       }
+      var binaryStr = chunks.join('');
       try {
         currentText = tfview.parse(binaryStr);
         output.textContent = currentText;
