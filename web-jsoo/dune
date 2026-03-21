@@ -5,14 +5,15 @@
  (preprocess
   (pps js_of_ocaml-ppx)))
 
-(copy_files
- (files static/*.html))
+(rule
+ (target tfview.js)
+ (deps tfview_web.bc.js)
+ (action
+  (copy %{deps} %{target})))
 
 (rule
- (alias serve)
- (deps index.html tfview_web.bc.js serve.js)
+ (target index.html)
+ (deps
+  (:src %{workspace_root}/web/static/index.html))
  (action
-  (setenv
-   SERVE_DIR
-   .
-   (run node serve.js 0.0.0.0 8080))))
+  (copy %{src} %{target})))
