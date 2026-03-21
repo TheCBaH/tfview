@@ -8,6 +8,18 @@ let string_of_int_array b v =
   ^ (Array.to_list arr |> List.map Int32.to_string |> String.concat ", ")
   ^ "]"
 
+let string_of_float_array b v =
+  let arr = Rt.Float.Vector.to_array b v in
+  "["
+  ^ (Array.to_list arr |> List.map (Printf.sprintf "%g") |> String.concat ", ")
+  ^ "]"
+
+let string_of_long_array b v =
+  let arr = Rt.Long.Vector.to_array b v in
+  "["
+  ^ (Array.to_list arr |> List.map Int64.to_string |> String.concat ", ")
+  ^ "]"
+
 let effective_opcode b op =
   let builtin = OperatorCode.builtin_code b op in
   if builtin = BuiltinOperator.add then
@@ -84,13 +96,15 @@ let bprint_builtin_options buf b op =
         (string_of_activation (SubOptions.fused_activation_function b o)))
     ~gather_options:(fun o ->
       Printf.bprintf buf "      axis=%ld batch_dims=%ld\n"
-        (GatherOptions.axis b o) (GatherOptions.batch_dims b o))
+        (GatherOptions.axis b o)
+        (GatherOptions.batch_dims b o))
     ~pack_options:(fun o ->
       Printf.bprintf buf "      values_count=%ld axis=%ld\n"
-        (PackOptions.values_count b o) (PackOptions.axis b o))
+        (PackOptions.values_count b o)
+        (PackOptions.axis b o))
     ~unpack_options:(fun o ->
-      Printf.bprintf buf "      num=%ld axis=%ld\n"
-        (UnpackOptions.num b o) (UnpackOptions.axis b o))
+      Printf.bprintf buf "      num=%ld axis=%ld\n" (UnpackOptions.num b o)
+        (UnpackOptions.axis b o))
     ~cast_options:(fun o ->
       Printf.bprintf buf "      in_data_type=%s out_data_type=%s\n"
         (TensorType.to_string (CastOptions.in_data_type b o))
@@ -101,16 +115,15 @@ let bprint_builtin_options buf b op =
         (ResizeBilinearOptions.half_pixel_centers b o))
     ~strided_slice_options:(fun o ->
       Printf.bprintf buf
-        "      begin_mask=%ld end_mask=%ld ellipsis_mask=%ld \
-         new_axis_mask=%ld shrink_axis_mask=%ld\n"
+        "      begin_mask=%ld end_mask=%ld ellipsis_mask=%ld new_axis_mask=%ld \
+         shrink_axis_mask=%ld\n"
         (StridedSliceOptions.begin_mask b o)
         (StridedSliceOptions.end_mask b o)
         (StridedSliceOptions.ellipsis_mask b o)
         (StridedSliceOptions.new_axis_mask b o)
         (StridedSliceOptions.shrink_axis_mask b o))
     ~reducer_options:(fun o ->
-      Printf.bprintf buf "      keep_dims=%b\n"
-        (ReducerOptions.keep_dims b o))
+      Printf.bprintf buf "      keep_dims=%b\n" (ReducerOptions.keep_dims b o))
     ~skip_gram_options:(fun o ->
       Printf.bprintf buf
         "      ngram_size=%ld max_skip_size=%ld include_all_ngrams=%b\n"
@@ -121,8 +134,7 @@ let bprint_builtin_options buf b op =
       Printf.bprintf buf "      type=%s\n"
         (LshprojectionType.to_string (LshprojectionOptions.type_ b o)))
     ~lstmoptions:(fun o ->
-      Printf.bprintf buf
-        "      kernel_type=%s cell_clip=%g proj_clip=%g%s\n"
+      Printf.bprintf buf "      kernel_type=%s cell_clip=%g proj_clip=%g%s\n"
         (LstmkernelType.to_string (Lstmoptions.kernel_type b o))
         (Lstmoptions.cell_clip b o)
         (Lstmoptions.proj_clip b o)
@@ -239,7 +251,30 @@ let model_to_string data =
                   ~some:(fun v -> string_of_int_array b v)
                   (Tensor.shape b tensor)
               in
-              Printf.bprintf buf "    [%d] %-40s %-12s %s\n" t_i name ty shape
+              Printf.bprintf buf "    [%d] %-40s %-12s %s\n" t_i name ty shape;
+              Rt.Option.iter
+                (fun qp ->
+                  let has_scale =
+                    Rt.Option.fold ~none:false
+                      ~some:(fun v -> Rt.Float.Vector.length b v > 0)
+                      (QuantizationParameters.scale b qp)
+                  in
+                  if has_scale then (
+                    Rt.Option.iter
+                      (fun v ->
+                        Printf.bprintf buf "      scale=%s"
+                          (string_of_float_array b v))
+                      (QuantizationParameters.scale b qp);
+                    Rt.Option.iter
+                      (fun v ->
+                        Printf.bprintf buf " zero_point=%s"
+                          (string_of_long_array b v))
+                      (QuantizationParameters.zero_point b qp);
+                    let qd = QuantizationParameters.quantized_dimension b qp in
+                    if qd <> 0l then
+                      Printf.bprintf buf " quantized_dimension=%ld" qd;
+                    Buf.add_char buf '\n'))
+                (Tensor.quantization b tensor)
             done)
           (SubGraph.tensors b sg)
       done)

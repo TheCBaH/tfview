@@ -55,4 +55,7 @@ if [ "$unparsed" -gt 0 ]; then
   fail "unparsed builtin options ($unparsed): $examples"
 fi
 
-echo "OK [$name]: $op_code_count op_codes, $op_count operators, $tensor_count tensors"
+# Count quantization parameters printed
+quant_params=$(grep -c '^ *scale=\[' "$file" || true)
+
+echo "OK [$name]: $op_code_count op_codes, $op_count operators, $tensor_count tensors, $quant_params quantized"
