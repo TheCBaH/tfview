@@ -1,7 +1,7 @@
 (executable
  (name tfview_web)
  (modes js)
- (libraries tfview_print js_of_ocaml)
+ (libraries tfview_print tfview_graph js_of_ocaml)
  (preprocess
   (pps js_of_ocaml-ppx)))
 
@@ -15,5 +15,12 @@
  (target index.html)
  (deps
   (:src %{workspace_root}/web/static/index.html))
+ (action
+  (copy %{src} %{target})))
+
+(rule
+ (target graph.html)
+ (deps
+  (:src %{workspace_root}/web/static/graph.html))
  (action
   (copy %{src} %{target})))
