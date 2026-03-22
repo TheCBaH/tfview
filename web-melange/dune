@@ -1,6 +1,10 @@
 (melange.emit
  (target output)
  (module_systems commonjs)
- (libraries tfview_print_mel melange.node)
+ (libraries
+  tfview_print_mel
+  tfview_graph_mel
+  model_explorer_mel
+  melange.node)
  (preprocess
   (pps melange.ppx)))

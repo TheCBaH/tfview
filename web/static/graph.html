@@ -41,8 +41,8 @@ fileInput.addEventListener('change', function(e) {
     }
     var binaryStr = chunks.join('');
     try {
-      var graphJson = tfview.graph(binaryStr);
-      var graphCollections = [JSON.parse(graphJson)];
+      var graphObj = tfview.graph(binaryStr);
+      var graphCollections = [graphObj];
       visualizer.graphCollections = graphCollections;
       status.textContent = file.name;
     } catch(err) {

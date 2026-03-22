@@ -443,8 +443,3 @@ let model_to_graph data =
       (Model.subgraphs b model)
   in
   ME.GraphCollection.create ~label:description ~graphs
-
-let graph_collection_to_json gc =
-  Format.asprintf "%a" (Jsont.pp_value ME.GraphCollection.jsont ()) gc
-
-let model_to_graph_json data = graph_collection_to_json (model_to_graph data)

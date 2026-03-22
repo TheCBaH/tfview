@@ -26,7 +26,7 @@ serve.listen(0, "127.0.0.1", async () => {
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ viewport: { width: 1024, height: 768 } });
-    await page.goto(`http://127.0.0.1:${port}/`);
+    await page.goto(`http://127.0.0.1:${port}/index.html`);
 
     await page.setInputFiles("#file", modelPath);
 

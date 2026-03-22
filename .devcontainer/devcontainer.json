@@ -13,7 +13,7 @@
             "upgradePackages": "false"
         },
         "./features/ocaml": {
-            "packages": "alcotest benchmark bigstringaf bytesrw cppo js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx jsont melange memtrace ppx_expect"
+            "packages": "alcotest benchmark bigstringaf brr bytesrw cppo js_of_ocaml js_of_ocaml-compiler js_of_ocaml-ppx jsont melange melange-webapi memtrace ppx_expect"
         },
         "./features/gh": {},
         "./features/npm": {

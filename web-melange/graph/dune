@@ -1,0 +1,8 @@
+(copy_files
+ (files %{workspace_root}/lib/graph/graph.ml))
+
+(library
+ (name tfview_graph_mel)
+ (wrapped false)
+ (modes melange)
+ (libraries tflite_schema_mel flatbuffers_mel model_explorer_mel))
