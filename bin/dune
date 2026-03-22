@@ -1,4 +1,4 @@
 (executable
  (name tfview)
  (modes exe js)
- (libraries tfview_print tfview_graph))
+ (libraries tfview_print tfview_graph model_explorer jsont.bytesrw))

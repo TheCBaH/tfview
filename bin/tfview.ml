@@ -21,6 +21,16 @@ let () =
       List.iter
         (fun path ->
           let data = read_file path in
-          if !graph_mode then print_string (Graph.model_to_graph_json data)
+          if !graph_mode then
+            let gc = Graph.model_to_graph data in
+            let json =
+              match
+                Jsont_bytesrw.encode_string ~format:Jsont.Minify
+                  Model_explorer.GraphCollection.jsont gc
+              with
+              | Ok s -> s
+              | Error e -> failwith e
+            in
+            print_string json
           else print_string (Print.model_to_string data))
         (List.rev !files)

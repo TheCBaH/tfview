@@ -6,7 +6,10 @@ let parse bytes =
 
 let graph bytes =
   let data = Bytes.unsafe_of_string (Js.to_bytestring bytes) in
-  Js.string (Graph.model_to_graph_json data)
+  let gc = Graph.model_to_graph data in
+  match Jsont_brr.encode_jv Model_explorer.GraphCollection.jsont gc with
+  | Ok jv -> jv
+  | Error e -> Jv.throw (Jv.Error.message e)
 
 let () =
   Js.export "tfview"

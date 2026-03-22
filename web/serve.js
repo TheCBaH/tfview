@@ -23,7 +23,7 @@ try {
 }
 
 const server = http.createServer((req, res) => {
-  const urlPath = req.url === "/" ? "index.html" : req.url;
+  const urlPath = req.url === "/" ? "/graph.html" : req.url;
 
   // Serve model-explorer assets from npm package
   if (meDistDir && urlPath.startsWith("/model-explorer/")) {

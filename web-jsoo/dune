@@ -1,7 +1,13 @@
 (executable
  (name tfview_web)
  (modes js)
- (libraries tfview_print tfview_graph js_of_ocaml)
+ (libraries
+  tfview_print
+  tfview_graph
+  model_explorer
+  jsont.brr
+  brr
+  js_of_ocaml)
  (preprocess
   (pps js_of_ocaml-ppx)))
 

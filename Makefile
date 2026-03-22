@@ -31,7 +31,7 @@ generate-check: generate
 	fi
 	@echo "Generated schema files are up to date"
 
-FMT_DIRS := bin lib/print lib/graph web-jsoo web-melange
+FMT_DIRS := bin lib/print lib/graph web-jsoo web-melange web-melange/model_explorer web-melange/graph
 
 fmt:
 	opam exec -- dune build $(addprefix @,$(addsuffix /fmt,$(FMT_DIRS))) --auto-promote
@@ -53,9 +53,9 @@ build-melange:
 
 build-web-melange: build-melange
 	mkdir -p $(MELANGE_WEB_DIR)/static
-	printf 'var m=require("./output/web-melange/web/tfview_mel_web.js");window.tfview={parse:m.parse};\n' > $(MELANGE_WEB_DIR)/entry.js
+	printf 'var m=require("./output/web-melange/web/tfview_mel_web.js");window.tfview={parse:m.parse,graph:m.graph};\n' > $(MELANGE_WEB_DIR)/entry.js
 	npx esbuild $(MELANGE_WEB_DIR)/entry.js --bundle --outfile=$(MELANGE_WEB_DIR)/static/tfview.js
-	cp web/static/index.html $(MELANGE_WEB_DIR)/static/
+	cp web/static/index.html web/static/graph.html $(MELANGE_WEB_DIR)/static/
 
 download:
 	@$(DL) tgz mobilenet_v1_1.0_224.tflite \
