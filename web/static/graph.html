@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tfview graph</title>
+<script src="model-explorer/main_browser.js"></script>
+<style>
+  body, html { height: 100%; overflow: hidden; padding: 0; margin: 0; }
+  .controls { position: fixed; top: 8px; left: 8px; z-index: 100;
+              background: white; padding: 4px 8px; border-radius: 4px;
+              box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+</style>
+</head>
+<body>
+<div class="controls">
+  <input type="file" id="file" accept=".tflite">
+  <span id="status"></span>
+</div>
+<script src="tfview.js"></script>
+<script>
+modelExplorer.assetFilesBaseUrl = 'model-explorer/static_files';
+modelExplorer.workerScriptPath = 'model-explorer/worker.js';
+
+var visualizer = document.createElement('model-explorer-visualizer');
+document.body.appendChild(visualizer);
+
+var fileInput = document.getElementById('file');
+var status = document.getElementById('status');
+
+fileInput.addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  status.textContent = 'Loading...';
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var bytes = new Uint8Array(ev.target.result);
+    var chunks = [];
+    for (var i = 0; i < bytes.length; i += 65534) {
+      chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 65534)));
+    }
+    var binaryStr = chunks.join('');
+    try {
+      var graphJson = tfview.graph(binaryStr);
+      var graphCollections = [JSON.parse(graphJson)];
+      visualizer.graphCollections = graphCollections;
+      status.textContent = file.name;
+    } catch(err) {
+      status.textContent = 'Error: ' + err.message;
+    }
+  };
+  reader.readAsArrayBuffer(file);
+});
+</script>
+</body>
+</html>

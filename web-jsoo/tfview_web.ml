@@ -4,8 +4,13 @@ let parse bytes =
   let data = Bytes.unsafe_of_string (Js.to_bytestring bytes) in
   Js.string (Print.model_to_string data)
 
+let graph bytes =
+  let data = Bytes.unsafe_of_string (Js.to_bytestring bytes) in
+  Js.string (Graph.model_to_graph_json data)
+
 let () =
   Js.export "tfview"
     object%js
       method parse bytes = parse bytes
+      method graph bytes = graph bytes
     end

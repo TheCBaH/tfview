@@ -6,20 +6,54 @@ const mimeTypes = {
   ".html": "text/html",
   ".js": "application/javascript",
   ".css": "text/css",
+  ".wasm": "application/wasm",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
 };
 
 const buildDir = process.env.SERVE_DIR || "_build/default/web-jsoo";
 
+// Resolve model-explorer assets from npm package
+let meDistDir;
+try {
+  meDistDir = path.join(path.dirname(require.resolve("ai-edge-model-explorer-visualizer/package.json")), "dist");
+} catch {
+  meDistDir = null;
+}
+
 const server = http.createServer((req, res) => {
-  const file = path.join(buildDir, req.url === "/" ? "index.html" : req.url);
-  try {
-    const contentType = mimeTypes[path.extname(file)] || "application/octet-stream";
+  const urlPath = req.url === "/" ? "index.html" : req.url;
+
+  // Serve model-explorer assets from npm package
+  if (meDistDir && urlPath.startsWith("/model-explorer/")) {
+    const mePath = path.join(meDistDir, urlPath.slice("/model-explorer/".length));
+    let data;
+    try {
+      data = fs.readFileSync(mePath);
+    } catch {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+    const contentType = mimeTypes[path.extname(mePath)] || "application/octet-stream";
     res.writeHead(200, { "Content-Type": contentType });
-    res.end(fs.readFileSync(file));
+    res.end(data);
+    return;
+  }
+
+  const file = path.join(buildDir, urlPath);
+  let data;
+  try {
+    data = fs.readFileSync(file);
   } catch {
     res.writeHead(404);
     res.end();
+    return;
   }
+  const contentType = mimeTypes[path.extname(file)] || "application/octet-stream";
+  res.writeHead(200, { "Content-Type": contentType });
+  res.end(data);
 });
 
 if (require.main === module) {
