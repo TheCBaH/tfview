@@ -4,3 +4,6 @@
 [submodule "modules/tflite-micro"]
 	path = modules/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git
+[submodule "modules/ocaml-model-explorer"]
+	path = modules/ocaml-model-explorer
+	url = https://github.com/TheCBaH/ocaml-model-explorer.git
