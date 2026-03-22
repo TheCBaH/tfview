@@ -31,7 +31,7 @@ generate-check: generate
 	fi
 	@echo "Generated schema files are up to date"
 
-FMT_DIRS := bin lib/print web-jsoo web-melange
+FMT_DIRS := bin lib/print lib/graph web-jsoo web-melange
 
 fmt:
 	opam exec -- dune build $(addprefix @,$(addsuffix /fmt,$(FMT_DIRS))) --auto-promote

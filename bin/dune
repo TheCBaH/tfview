@@ -1,4 +1,4 @@
 (executable
  (name tfview)
  (modes exe js)
- (libraries tfview_print))
+ (libraries tfview_print tfview_graph))
