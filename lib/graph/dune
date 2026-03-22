@@ -1,0 +1,4 @@
+(library
+ (name tfview_graph)
+ (wrapped false)
+ (libraries tflite_schema flatbuffers model_explorer jsont))
