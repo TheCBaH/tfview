@@ -1,0 +1,77 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [devel]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v6
+      with:
+        submodules: recursive
+    - name: devcontainer
+      uses: ./.github/workflows/actions/devcontainer
+      id: devcontainer
+    - name: setup
+      run: |
+        echo 'EXEC=${{ steps.devcontainer.outputs.exec }}' >> $GITHUB_ENV
+    - name: build flatc
+      run: |
+        ${{ env.EXEC }} make flatc
+    - name: install ocaml deps
+      run: |
+        ${{ env.EXEC }} bash -c '. /etc/bash.bashrc && sudo OPAMROOT=$OPAMROOT make deps'
+    - name: build jsoo
+      run: |
+        ${{ env.EXEC }} make build
+    - name: build melange
+      run: |
+        ${{ env.EXEC }} make build-web-melange
+    - name: assemble site
+      run: |
+        ${{ env.EXEC }} bash -c '
+          set -e
+          mkdir -p _site/jsoo _site/melange
+
+          # JSOO build
+          cp _build/default/web-jsoo/index.html _site/jsoo/
+          cp _build/default/web-jsoo/graph.html _site/jsoo/
+          cp _build/default/web-jsoo/tfview.js _site/jsoo/
+
+          # Melange build
+          cp _build/default/web-melange/web/static/index.html _site/melange/
+          cp _build/default/web-melange/web/static/graph.html _site/melange/
+          cp _build/default/web-melange/web/static/tfview.js _site/melange/
+
+          # model-explorer assets for graph visualization
+          ME_DIST=$(node -e "console.log(require.resolve(\"ai-edge-model-explorer-visualizer/package.json\").replace(\"/package.json\",\"/dist\"))")
+          cp -r "$ME_DIST" _site/jsoo/model-explorer
+          cp -r "$ME_DIST" _site/melange/model-explorer
+
+          # Landing page
+          cp web/static/landing.html _site/index.html
+
+          # Prevent Jekyll processing
+          touch _site/.nojekyll
+        '
+    - name: upload pages artifact
+      uses: actions/upload-pages-artifact@v3
+    - name: deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
