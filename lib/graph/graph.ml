@@ -224,8 +224,8 @@ let build_tensor_producer_map b sg_idx ops tensors =
   done;
   producers
 
-let model_to_graph data =
-  let (Rt.Root (b, model)) = Model.root Flatbuffers.Primitives.Bytes data in
+let model_to_graph_with prim data =
+  let (Rt.Root (b, model)) = Model.root prim data in
   let description =
     Rt.Option.fold ~none:"TFLite Model"
       ~some:(fun s ->
@@ -443,3 +443,5 @@ let model_to_graph data =
       (Model.subgraphs b model)
   in
   ME.GraphCollection.create ~label:description ~graphs
+
+let model_to_graph data = model_to_graph_with Flatbuffers.Primitives.Bytes data

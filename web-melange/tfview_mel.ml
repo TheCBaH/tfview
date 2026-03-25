@@ -1,5 +1,9 @@
-external read_file_sync : string -> Node.Buffer.t = "readFileSync"
+external read_file_sync : string -> Js.Typed_array.Uint8Array.t = "readFileSync"
 [@@mel.module "fs"]
+
+let dataview_of_uint8array : Js.Typed_array.Uint8Array.t -> Js_dataview.t =
+  [%mel.raw
+    {|function(u8) { return new DataView(u8.buffer, u8.byteOffset, u8.byteLength) }|}]
 
 let () =
   let args = Node.Process.argv in
@@ -14,10 +18,10 @@ let () =
     Node.Process.exit 1);
   let path = args.(!file_idx) in
   let buf = read_file_sync path in
-  let data =
-    Bytes.unsafe_of_string (Node.Buffer.toString ~encoding:`binary buf)
-  in
+  let dv = dataview_of_uint8array buf in
   if !graph_mode then
-    let gc = Graph.model_to_graph data in
+    let gc = Graph.model_to_graph_with Flatbuffers.Primitives.JsDataView dv in
     print_string (Js.Json.stringify (Model_explorer.GraphCollection.jsont gc))
-  else print_string (Print.model_to_string data)
+  else
+    print_string
+      (Print.model_to_string_with Flatbuffers.Primitives.JsDataView dv)

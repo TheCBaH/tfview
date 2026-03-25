@@ -13,7 +13,7 @@ if (mode === "api") {
   global.window = {};
   const mod = require(path.resolve(bundlePath));
   const tfview = (mod && mod.tfview) || window.tfview;
-  const data = fs.readFileSync(modelPath, "latin1");
+  const data = new Uint8Array(fs.readFileSync(modelPath));
   process.stdout.write(tfview.parse(data));
 } else if (mode === "dom") {
   const { JSDOM } = require("jsdom");

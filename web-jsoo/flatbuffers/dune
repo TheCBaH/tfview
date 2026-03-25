@@ -71,6 +71,8 @@
    %{target})))
 
 (library
- (name flatbuffers_mel)
+ (name flatbuffers_jsoo)
  (wrapped false)
- (modes melange))
+ (libraries js_of_ocaml)
+ (preprocess
+  (pps js_of_ocaml-ppx)))

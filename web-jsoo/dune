@@ -2,8 +2,9 @@
  (name tfview_web)
  (modes js)
  (libraries
-  tfview_print
-  tfview_graph
+  tfview_print_jsoo
+  tfview_graph_jsoo
+  flatbuffers_jsoo
   model_explorer
   jsont.brr
   brr
