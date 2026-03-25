@@ -151,8 +151,8 @@ let bprint_builtin_options buf b op =
       if name <> "none" then Printf.bprintf buf "      <%s>\n" name)
     b op
 
-let model_to_string data =
-  let (Rt.Root (b, model)) = Model.root Flatbuffers.Primitives.Bytes data in
+let model_to_string_with prim data =
+  let (Rt.Root (b, model)) = Model.root prim data in
   let buf = Buf.create 4096 in
 
   (* Version and description *)
@@ -281,3 +281,6 @@ let model_to_string data =
     (Model.subgraphs b model);
 
   Buf.contents buf
+
+let model_to_string data =
+  model_to_string_with Flatbuffers.Primitives.Bytes data

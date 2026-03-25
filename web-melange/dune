@@ -4,6 +4,7 @@
  (libraries
   tfview_print_mel
   tfview_graph_mel
+  flatbuffers_mel
   model_explorer_mel
   melange.node)
  (preprocess

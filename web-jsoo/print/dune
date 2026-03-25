@@ -1,0 +1,7 @@
+(copy_files
+ (files %{workspace_root}/lib/print/*.ml))
+
+(library
+ (name tfview_print_jsoo)
+ (wrapped false)
+ (libraries tflite_schema_jsoo flatbuffers_jsoo))
