@@ -17,6 +17,12 @@
 <h1>tfview</h1>
 <div class="controls">
   <input type="file" id="file" accept=".tflite">
+  <select id="sample">
+    <option value="">-- or select a sample model --</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/gpu/multi_person_mobilenet_v1_075_float.tflite">multi_person_mobilenet_v1_075_float</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/gpu/deeplabv3_257_mv_gpu.tflite">deeplabv3_257_mv_gpu</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification.tflite">text_classification</option>
+  </select>
   <button id="download" disabled>Download as text</button>
 </div>
 <pre id="output">Select a .tflite file to view its structure.</pre>
@@ -24,33 +30,48 @@
 <script>
 (function() {
   var fileInput = document.getElementById('file');
+  var sampleSelect = document.getElementById('sample');
   var output = document.getElementById('output');
   var downloadBtn = document.getElementById('download');
   var currentText = '';
+  var currentName = 'model';
+
+  function parseBytes(bytes, name) {
+    try {
+      currentText = tfview.parse(bytes);
+      currentName = name;
+      output.textContent = currentText;
+      downloadBtn.disabled = false;
+    } catch(err) {
+      output.textContent = 'Error: ' + err.message;
+      downloadBtn.disabled = true;
+    }
+  }
 
   fileInput.addEventListener('change', function(e) {
     var file = e.target.files[0];
     if (!file) return;
+    sampleSelect.value = '';
     output.textContent = 'Loading...';
     var reader = new FileReader();
     reader.onload = function(ev) {
-      // TODO: pass Uint8Array directly to OCaml without string conversion
-      var bytes = new Uint8Array(ev.target.result);
-      var chunks = [];
-      for (var i = 0; i < bytes.length; i += 65534) {
-        chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 65534)));
-      }
-      var binaryStr = chunks.join('');
-      try {
-        currentText = tfview.parse(binaryStr);
-        output.textContent = currentText;
-        downloadBtn.disabled = false;
-      } catch(err) {
-        output.textContent = 'Error: ' + err.message;
-        downloadBtn.disabled = true;
-      }
+      parseBytes(new Uint8Array(ev.target.result), file.name);
     };
     reader.readAsArrayBuffer(file);
+  });
+
+  sampleSelect.addEventListener('change', function() {
+    var url = sampleSelect.value;
+    if (!url) return;
+    fileInput.value = '';
+    var name = url.split('/').pop();
+    output.textContent = 'Downloading ' + name + '...';
+    downloadBtn.disabled = true;
+    fetch(url).then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
+      parseBytes(new Uint8Array(buf), name);
+    }).catch(function(err) {
+      output.textContent = 'Download failed: ' + err.message;
+    });
   });
 
   downloadBtn.addEventListener('click', function() {
@@ -58,7 +79,7 @@
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = (fileInput.files[0] ? fileInput.files[0].name : 'model') + '.txt';
+    a.download = currentName + '.txt';
     a.click();
     URL.revokeObjectURL(url);
   });
