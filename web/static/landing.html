@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tfview</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.5rem; }
+  p { color: #444; }
+  .targets { display: flex; gap: 2rem; margin-top: 2rem; }
+  .target { border: 1px solid #ddd; border-radius: 4px; padding: 1.5rem; flex: 1; }
+  .target h2 { font-size: 1.1rem; margin-top: 0; }
+  .target a { display: inline-block; margin-top: 0.5rem; color: #0366d6; }
+</style>
+</head>
+<body>
+<h1>tfview</h1>
+<p>Parse and visualize TensorFlow Lite model files in the browser.</p>
+<div class="targets">
+  <div class="target">
+    <h2>js_of_ocaml</h2>
+    <p>Compiled with js_of_ocaml.</p>
+    <a href="jsoo/">Model parser</a><br>
+    <a href="jsoo/graph.html">Graph visualization</a>
+  </div>
+  <div class="target">
+    <h2>Melange</h2>
+    <p>Compiled with Melange + esbuild.</p>
+    <a href="melange/">Model parser</a><br>
+    <a href="melange/graph.html">Graph visualization</a>
+  </div>
+</div>
+</body>
+</html>
