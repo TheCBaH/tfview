@@ -43,6 +43,9 @@ jobs:
     - name: build melange
       run: |
         ${{ env.EXEC }} make build-web-melange
+    - name: install npm deps
+      run: |
+        ${{ env.EXEC }} npm install
     - name: assemble site
       run: |
         ${{ env.EXEC }} bash -c '
