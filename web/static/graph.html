@@ -15,6 +15,12 @@
 <body>
 <div class="controls">
   <input type="file" id="file" accept=".tflite">
+  <select id="sample">
+    <option value="">-- or select a sample model --</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/gpu/multi_person_mobilenet_v1_075_float.tflite">multi_person_mobilenet_v1_075_float</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/gpu/deeplabv3_257_mv_gpu.tflite">deeplabv3_257_mv_gpu</option>
+    <option value="https://storage.googleapis.com/download.tensorflow.org/models/tflite/text_classification/text_classification.tflite">text_classification</option>
+  </select>
   <span id="status"></span>
 </div>
 <script src="tfview.js"></script>
@@ -26,30 +32,42 @@ var visualizer = document.createElement('model-explorer-visualizer');
 document.body.appendChild(visualizer);
 
 var fileInput = document.getElementById('file');
+var sampleSelect = document.getElementById('sample');
 var status = document.getElementById('status');
+
+function showGraph(bytes, name) {
+  try {
+    var graphObj = tfview.graph(bytes);
+    visualizer.graphCollections = [graphObj];
+    status.textContent = name;
+  } catch(err) {
+    status.textContent = 'Error: ' + err.message;
+  }
+}
 
 fileInput.addEventListener('change', function(e) {
   var file = e.target.files[0];
   if (!file) return;
+  sampleSelect.value = '';
   status.textContent = 'Loading...';
   var reader = new FileReader();
   reader.onload = function(ev) {
-    var bytes = new Uint8Array(ev.target.result);
-    var chunks = [];
-    for (var i = 0; i < bytes.length; i += 65534) {
-      chunks.push(String.fromCharCode.apply(null, bytes.subarray(i, i + 65534)));
-    }
-    var binaryStr = chunks.join('');
-    try {
-      var graphObj = tfview.graph(binaryStr);
-      var graphCollections = [graphObj];
-      visualizer.graphCollections = graphCollections;
-      status.textContent = file.name;
-    } catch(err) {
-      status.textContent = 'Error: ' + err.message;
-    }
+    showGraph(new Uint8Array(ev.target.result), file.name);
   };
   reader.readAsArrayBuffer(file);
+});
+
+sampleSelect.addEventListener('change', function() {
+  var url = sampleSelect.value;
+  if (!url) return;
+  fileInput.value = '';
+  var name = url.split('/').pop();
+  status.textContent = 'Downloading ' + name + '...';
+  fetch(url).then(function(r) { return r.arrayBuffer(); }).then(function(buf) {
+    showGraph(new Uint8Array(buf), name);
+  }).catch(function(err) {
+    status.textContent = 'Download failed: ' + err.message;
+  });
 });
 </script>
 </body>
