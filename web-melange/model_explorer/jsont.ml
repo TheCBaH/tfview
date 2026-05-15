@@ -5,6 +5,8 @@ type 'a t = 'a -> Js.Json.t
 
 let string s = Js.Json.string s
 let bool b = Js.Json.boolean b
+let number f = Js.Json.number f
+let map ?kind:_ ?doc:_ ?dec:_ ~enc t = fun b -> t (enc b)
 
 let list (t : 'a t) (items : 'a list) =
   Js.Json.array (Array.of_list (List.map t items))
