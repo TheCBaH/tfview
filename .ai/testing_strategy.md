@@ -1,0 +1,102 @@
+# Testing Strategy
+
+## Three Test Layers
+
+### 1. Inline expect tests (`test/scc_test.ml`, `test/codegen_test.ml`, `test/type_expr_test.ml`)
+
+Unit tests using `ppx_expect` / `[%expect ...]`. Run with `dune test` or
+`dune runtest test/`. These test:
+- `Scc.Make(String).run` on hand-crafted graphs (topological order, self-loops, multi-SCCs)
+- `Schema_codegen.generate` on small hand-crafted `Type_def.t String_map.t` inputs
+- `Type_expr_parse.of_string` round-trips
+
+Snapshots are auto-promoted by `dune promote`.
+
+### 2. Cram tests — incremental parser tests (`test/parse_cram.t`, `test/default_cram.t`, `test/jsont_explore_cram.t`)
+
+Test specific decode scenarios in isolation before testing on full models. Each test:
+- Writes a small `.ml` script via heredoc
+- Runs it with `ocaml schema_runtime.cma script.ml 2>/dev/null`
+- Compares stdout against recorded expected output
+
+The `parse_cram.t` tests cover one type per test, in dependency order:
+1. `SchemaVersion` — plain struct, two ints
+2. `TensorArgument` — struct, single string
+3. `ArgumentKind` — enum decoded from integer
+4. `SymIntArgument` — union, single-key dispatch
+5. `RangeConstraint` — optional fields (absent key → None)
+6. `Node` — optional field with explicit JSON null → None
+
+`jsont_explore_cram.t` documents the correct `Jsont.option` + `Option.join` pattern
+and regression-tests it against four input cases (absent, present, null, both).
+
+`default_cram.t` regression-tests the `Mem_default` fix: decodes a `Graph` JSON with
+all optional-defaulted fields present and verifies `nodes=0`.
+
+### 3. Cram tests — full model parsing (`test/model_cram.t`, `test/models_cram.t`)
+
+End-to-end tests that decode real exported model files.
+
+`model_cram.t` — resnet18 (`model.json`):
+- Prints `schema=8.14 nodes=69` followed by the op-type histogram (sorted by count)
+- Expected output is committed (auto-promoted from `dune promote`)
+
+`models_cram.t` — all 17 models in a single OCaml run:
+- Each model prints one line: `name: schema=8.14 nodes=N` + indented histogram
+- Expected output is committed
+
+Both tests share helper code from `test/model_test_utils.ml` via `#use`.
+
+## Shared Test Utilities: `model_test_utils.ml`
+
+`test/model_test_utils.ml` provides:
+
+```ocaml
+val node_type_counts : Graph_Type.t -> (string * int) list
+(* returns (op_target, count) pairs sorted by count descending *)
+
+val pp_model : Format.formatter -> ExportedProgram.t -> unit
+(* prints: schema=M.N nodes=K\n  op1: count\n  op2: count\n ... *)
+```
+
+The file lives in the source tree and is listed in cram `(deps ...)`. There is no
+copy rule for it — dune handles source-tree files directly.
+
+## When to Add a New Cram Test
+
+- After fixing a code generator bug: add a cram test that exercises the exact JSON
+  pattern that was failing (see `jsont_explore_cram.t`, `default_cram.t`).
+- After adding a new schema type support: add a case to `parse_cram.t`.
+- After adding a new model: add a rule in `test/dune` and list it in `models_cram.t`.
+
+## Workflow
+
+```sh
+# Run all tests
+opam exec -- dune runtest
+
+# Run a specific cram test (shows diff if output changed)
+opam exec -- dune runtest test/model_cram.t
+
+# Accept new expected output
+opam exec -- dune promote test/model_cram.t
+
+# Verify promotion worked
+opam exec -- dune runtest test/model_cram.t
+```
+
+## What Each Model Shows (as of schema 8.14)
+
+From `models_cram.t` expected output:
+
+| Model | Nodes | Dominant ops |
+|---|---|---|
+| resnet18 | 69 | conv2d:20, batch_norm:20, relu_:17, add_:8 |
+| efficientnet_b0 | 240 | conv2d:81, silu_:49, batch_norm:49, adaptive_avg_pool2d:17 |
+| efficientnet_b1/b2 | 342 | conv2d:115, silu_:69, batch_norm:69 |
+| efficientnet_b3 | 387 | conv2d:130, silu_:78, batch_norm:78 |
+| efficientnet_b4 | 477 | conv2d:160, silu_:96, batch_norm:96 |
+| efficientnet_b5 | 579 | conv2d:194, silu_:116, batch_norm:116 |
+
+ResNet uses `relu_` (in-place ReLU) and `add_` (in-place residual add).
+EfficientNet uses `silu_` (Swish) and `sigmoid+mul` for SE blocks.

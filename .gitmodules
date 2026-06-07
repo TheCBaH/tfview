@@ -1,0 +1,9 @@
+[submodule "modules/pytorch.models.pt2"]
+	path = modules/pytorch.models.pt2
+	url = https://github.com/TheCBaH/pytorch.models.pt2.git
+[submodule "modules/pytorch"]
+	path = modules/pytorch
+	url = https://github.com/pytorch/pytorch.git
+[submodule "vendored/ocaml-yamlt"]
+	path = vendored/ocaml-yamlt
+	url = https://github.com/TheCBaH/ocaml-yamlt.git

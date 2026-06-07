@@ -1,0 +1,454 @@
+(library
+ (name scc_test)
+ (modules scc_test)
+ (libraries pytorch_schema)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
+
+(library
+ (name codegen_test)
+ (modules codegen_test)
+ (libraries pytorch_schema)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
+
+(library
+ (name type_expr_test)
+ (modules type_expr_test)
+ (libraries pytorch_schema)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
+
+; Generate OCaml types from the PyTorch export schema.
+
+(rule
+ (target schema_pytorch.ml)
+ (deps
+  (file ../data/schema.yaml))
+ (action
+  (with-stdout-to
+   %{target}
+   (run %{exe:../bin/schema_gen.exe} %{dep:../data/schema.yaml}))))
+
+; Dune's (cram (deps (file ../...))) builds cross-directory artifacts but does
+; not place them in the cram sandbox.  Copy them into this directory's build
+; tree so the cram test sees them as local files.
+;
+; schema_runtime.cmi lives in .schema_runtime.objs/byte/ (dune's hidden objs
+; convention: .<libname>.objs/byte/).  Without it on OCaml's include path,
+; 'open Schema_runtime' fails even after loading the .cma.  Placing both in
+; the cram cwd lets the toplevel find the interface via its implicit '.'
+; search without any -I flag.
+
+(rule
+ (target schema_runtime.cma)
+ (action
+  (copy ../lib/schema_runtime/schema_runtime.cma %{target})))
+
+(rule
+ (target schema_runtime.cmi)
+ (action
+  (copy
+   ../lib/schema_runtime/.schema_runtime.objs/byte/schema_runtime.cmi
+   %{target})))
+
+(cram
+ (applies_to schema_cram)
+ (deps schema_pytorch.ml schema_runtime.cma schema_runtime.cmi))
+
+(cram
+ (applies_to parse_cram)
+ (deps schema_pytorch.ml schema_runtime.cma schema_runtime.cmi))
+
+(cram
+ (applies_to jsont_explore_cram))
+
+; model.json lives in an excluded git submodule; copy it via a shell rule
+; (same pattern as data/dune for schema.yaml).
+
+(rule
+ (target model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet18/models/model.json))))
+
+(cram
+ (applies_to default_cram)
+ (deps schema_pytorch.ml schema_runtime.cma schema_runtime.cmi))
+
+(cram
+ (applies_to model_cram)
+ (deps
+  model_test_utils.ml
+  schema_pytorch.ml
+  schema_runtime.cma
+  schema_runtime.cmi
+  model.json))
+
+; Per-model copies for models_cram (all 17 exported models).
+
+(rule
+ (target efficientnet_b0_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b0/models/model.json))))
+
+(rule
+ (target efficientnet_b1_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b1/models/model.json))))
+
+(rule
+ (target efficientnet_b2_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b2/models/model.json))))
+
+(rule
+ (target efficientnet_b3_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b3/models/model.json))))
+
+(rule
+ (target efficientnet_b4_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b4/models/model.json))))
+
+(rule
+ (target efficientnet_b5_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b5/models/model.json))))
+
+(rule
+ (target efficientnet_b6_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b6/models/model.json))))
+
+(rule
+ (target efficientnet_b7_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b7/models/model.json))))
+
+(rule
+ (target efficientnet_v2_l_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_l/models/model.json))))
+
+(rule
+ (target efficientnet_v2_m_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_m/models/model.json))))
+
+(rule
+ (target efficientnet_v2_s_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_s/models/model.json))))
+
+(rule
+ (target mobilenet_v2_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/mobilenet_v2/models/model.json))))
+
+(rule
+ (target resnet18_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet18/models/model.json))))
+
+(rule
+ (target resnet34_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet34/models/model.json))))
+
+(rule
+ (target resnet50_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet50/models/model.json))))
+
+(rule
+ (target resnet101_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet101/models/model.json))))
+
+(rule
+ (target resnet152_model.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet152/models/model.json))))
+
+(cram
+ (applies_to models_cram)
+ (deps
+  model_test_utils.ml
+  schema_pytorch.ml
+  schema_runtime.cma
+  schema_runtime.cmi
+  efficientnet_b0_model.json
+  efficientnet_b1_model.json
+  efficientnet_b2_model.json
+  efficientnet_b3_model.json
+  efficientnet_b4_model.json
+  efficientnet_b5_model.json
+  efficientnet_b6_model.json
+  efficientnet_b7_model.json
+  efficientnet_v2_l_model.json
+  efficientnet_v2_m_model.json
+  efficientnet_v2_s_model.json
+  mobilenet_v2_model.json
+  resnet18_model.json
+  resnet34_model.json
+  resnet50_model.json
+  resnet101_model.json
+  resnet152_model.json))
+
+; Per-model copies of model_weights_config.json for weights_config_cram.
+
+(rule
+ (target efficientnet_b0_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b0/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b1_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b1/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b2_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b2/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b3_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b3/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b4_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b4/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b5_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b5/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b6_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b6/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_b7_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_b7/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_v2_l_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_l/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_v2_m_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_m/data/weights/model_weights_config.json))))
+
+(rule
+ (target efficientnet_v2_s_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/efficientnet_v2_s/data/weights/model_weights_config.json))))
+
+(rule
+ (target mobilenet_v2_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/mobilenet_v2/data/weights/model_weights_config.json))))
+
+(rule
+ (target resnet18_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet18/data/weights/model_weights_config.json))))
+
+(rule
+ (target resnet34_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet34/data/weights/model_weights_config.json))))
+
+(rule
+ (target resnet50_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet50/data/weights/model_weights_config.json))))
+
+(rule
+ (target resnet101_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet101/data/weights/model_weights_config.json))))
+
+(rule
+ (target resnet152_weights_config.json)
+ (action
+  (with-stdout-to
+   %{target}
+   (run
+    cat
+    %{project_root}/../../modules/pytorch.models.pt2/models/resnet152/data/weights/model_weights_config.json))))
+
+(executable
+ (name parse_weights_config)
+ (modules parse_weights_config)
+ (libraries pytorch_types jsont jsont.bytesrw schema_runtime))
+
+(cram
+ (applies_to weights_config_cram)
+ (deps
+  %{exe:parse_weights_config.exe}
+  efficientnet_b0_weights_config.json
+  efficientnet_b1_weights_config.json
+  efficientnet_b2_weights_config.json
+  efficientnet_b3_weights_config.json
+  efficientnet_b4_weights_config.json
+  efficientnet_b5_weights_config.json
+  efficientnet_b6_weights_config.json
+  efficientnet_b7_weights_config.json
+  efficientnet_v2_l_weights_config.json
+  efficientnet_v2_m_weights_config.json
+  efficientnet_v2_s_weights_config.json
+  mobilenet_v2_weights_config.json
+  resnet18_weights_config.json
+  resnet34_weights_config.json
+  resnet50_weights_config.json
+  resnet101_weights_config.json
+  resnet152_weights_config.json))

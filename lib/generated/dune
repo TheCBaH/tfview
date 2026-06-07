@@ -1,0 +1,13 @@
+(library
+ (name pytorch_types)
+ (wrapped false)
+ (libraries jsont schema_runtime))
+
+(rule
+ (target pytorch_types.ml)
+ (deps
+  (file ../../data/schema.yaml))
+ (action
+  (with-stdout-to
+   %{target}
+   (run %{exe:../../bin/schema_gen.exe} %{dep:../../data/schema.yaml}))))
