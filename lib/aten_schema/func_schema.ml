@@ -1,6 +1,6 @@
 open Func_ast
 
-let parse (s : string) : (func_schema, string) result =
+let parse (s : string) : (t, string) result =
   let lexbuf = Lexing.from_string s in
   match Func_parser.func_schema Func_lexer.token lexbuf with
   | v -> Ok v

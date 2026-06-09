@@ -1,7 +1,7 @@
 %{
 open Func_ast
 
-let is_out_arg (a : argument) =
+let is_out_arg (a : Argument.t) =
   match a.annotation with Some ann -> ann.is_write | None -> false
 %}
 
@@ -16,7 +16,7 @@ let is_out_arg (a : argument) =
 %token LPAREN RPAREN LBRACKET RBRACKET COMMA DOT EQ BANG STAR QUESTION PIPE ARROW
 %token EOF
 
-%start <Func_ast.func_schema> func_schema
+%start <Func_ast.t> func_schema
 %%
 
 (* ---- top level ---- *)
@@ -25,15 +25,15 @@ func_schema:
   | op=op_name LPAREN args=arg_list RPAREN ARROW ret=returns EOF
     { let positional, kwarg_only, out = args in
       { name = op;
-        arguments = { positional; kwarg_only; out };
+        arguments = Arguments.{ positional; kwarg_only; out };
         returns = ret } }
 ;
 
 (* ---- op name: base[.overload] ---- *)
 
 op_name:
-  | base=name_part DOT overload=name_part { { base; overload = Some overload } }
-  | base=name_part                        { { base; overload = None } }
+  | base=name_part DOT overload=name_part { Op_name.{ base; overload = Some overload } }
+  | base=name_part                        { Op_name.{ base; overload = None } }
 ;
 
 (* op names can include any identifier or type keyword *)
@@ -68,7 +68,7 @@ type_kw_str:
   | FALSE         { "False" }
 ;
 
-(* ---- argument list, returns (positional, kwarg_only, out) ---- *)
+(* ---- argument list: returns (positional, kwarg_only, out) ---- *)
 
 arg_list:
   | (* empty *)              { [], [], [] }
@@ -99,52 +99,55 @@ kwarg_args:
 
 argument:
   | TENSOR LPAREN ann=annotation RPAREN name=arg_name dflt=opt_default
-    { { name; ty = Base Tensor; annotation = Some ann; default = dflt } }
+    { Argument.{ name; ty = Type.Base Base.Tensor;
+                 annotation = Some ann; default = dflt } }
   | TENSOR LPAREN ann=annotation RPAREN QUESTION name=arg_name dflt=opt_default
-    { { name; ty = Optional (Base Tensor); annotation = Some ann; default = dflt } }
+    { Argument.{ name; ty = Type.Optional (Type.Base Base.Tensor);
+                 annotation = Some ann; default = dflt } }
   | TENSOR LPAREN ann=annotation RPAREN LBRACKET RBRACKET name=arg_name dflt=opt_default
-    { { name; ty = List (Base Tensor, None); annotation = Some ann; default = dflt } }
+    { Argument.{ name; ty = Type.List (Type.Base Base.Tensor, None);
+                 annotation = Some ann; default = dflt } }
   | ty=reg_ty name=arg_name dflt=opt_default
-    { { name; ty; annotation = None; default = dflt } }
+    { Argument.{ name; ty; annotation = None; default = dflt } }
 ;
 
 (* ---- regular (un-annotated) types ---- *)
 
 reg_ty:
-  | b=base_ty                              { Base b }
-  | t=reg_ty QUESTION                      { Optional t }
-  | t=reg_ty LBRACKET RBRACKET             { List (t, None) }
-  | t=reg_ty LBRACKET n=INT_LIT RBRACKET   { List (t, Some n) }
+  | b=base_ty                              { Type.Base b }
+  | t=reg_ty QUESTION                      { Type.Optional t }
+  | t=reg_ty LBRACKET RBRACKET             { Type.List (t, None) }
+  | t=reg_ty LBRACKET n=INT_LIT RBRACKET   { Type.List (t, Some n) }
 ;
 
 base_ty:
-  | GENERATOR     { Generator }
-  | SCALAR_TYPE   { ScalarType }
-  | TENSOR        { Tensor }
-  | INT_TY        { Int }
-  | DIMNAME       { Dimname }
-  | DIM_VECTOR    { DimVector }
-  | FLOAT_TY      { Float }
-  | STR_TY        { Str }
-  | BOOL_TY       { Bool }
-  | LAYOUT        { Layout }
-  | DEVICE        { Device }
-  | DEVICE_INDEX  { DeviceIndex }
-  | SCALAR        { Scalar }
-  | MEMORY_FORMAT { MemoryFormat }
-  | QSCHEME       { QScheme }
-  | STORAGE       { Storage }
-  | STREAM        { Stream }
-  | SYM_INT       { SymInt }
-  | SYM_BOOL      { SymBool }
-  | GRAPH_MODULE  { GraphModule }
+  | GENERATOR     { Base.Generator }
+  | SCALAR_TYPE   { Base.ScalarType }
+  | TENSOR        { Base.Tensor }
+  | INT_TY        { Base.Int }
+  | DIMNAME       { Base.Dimname }
+  | DIM_VECTOR    { Base.DimVector }
+  | FLOAT_TY      { Base.Float }
+  | STR_TY        { Base.Str }
+  | BOOL_TY       { Base.Bool }
+  | LAYOUT        { Base.Layout }
+  | DEVICE        { Base.Device }
+  | DEVICE_INDEX  { Base.DeviceIndex }
+  | SCALAR        { Base.Scalar }
+  | MEMORY_FORMAT { Base.MemoryFormat }
+  | QSCHEME       { Base.QScheme }
+  | STORAGE       { Base.Storage }
+  | STREAM        { Base.Stream }
+  | SYM_INT       { Base.SymInt }
+  | SYM_BOOL      { Base.SymBool }
+  | GRAPH_MODULE  { Base.GraphModule }
 ;
 
 (* ---- annotation: letter(s) + optional ! + optional -> alias_after ---- *)
 
 annotation:
   | alias=alias_set wr=write_flag after=alias_after
-    { { alias_set = alias; is_write = wr; alias_set_after = after } }
+    { Annotation.{ alias_set = alias; is_write = wr; alias_set_after = after } }
 ;
 
 alias_set:
@@ -152,7 +155,7 @@ alias_set:
 ;
 
 alias_rest:
-  | (* empty *)               { [] }
+  | (* empty *)                  { [] }
   | PIPE c=IDENT rest=alias_rest { c :: rest }
 ;
 
@@ -175,20 +178,20 @@ arg_name:
 ;
 
 opt_default:
-  | (* empty *)                        { None }
-  | EQ v=default_val                   { Some v }
+  | (* empty *)    { None }
+  | EQ v=default_val { Some v }
 ;
 
 default_val:
-  | NONE                              { DefaultNone }
-  | TRUE                              { DefaultBool true }
-  | FALSE                             { DefaultBool false }
-  | n=INT_LIT                         { DefaultInt n }
-  | s=FLOAT_LIT                       { DefaultFloat s }
-  | s=STR_LIT                         { DefaultStr s }
-  | LBRACKET RBRACKET                 { DefaultIntList [] }
-  | LBRACKET ns=int_list RBRACKET     { DefaultIntList ns }
-  | s=IDENT                           { DefaultIdent s }
+  | NONE                              { Default.None }
+  | TRUE                              { Default.Bool true }
+  | FALSE                             { Default.Bool false }
+  | n=INT_LIT                         { Default.Int n }
+  | s=FLOAT_LIT                       { Default.Float s }
+  | s=STR_LIT                         { Default.Str s }
+  | LBRACKET RBRACKET                 { Default.IntList [] }
+  | LBRACKET ns=int_list RBRACKET     { Default.IntList ns }
+  | s=IDENT                           { Default.Ident s }
 ;
 
 int_list:
@@ -211,17 +214,19 @@ ret_list:
 
 return_val:
   | TENSOR LPAREN ann=annotation RPAREN rname=opt_ret_name
-    { { name = rname; ty = Base Tensor; annotation = Some ann } }
+    { Return.{ name = rname; ty = Type.Base Base.Tensor; annotation = Some ann } }
   | TENSOR LPAREN ann=annotation RPAREN QUESTION rname=opt_ret_name
-    { { name = rname; ty = Optional (Base Tensor); annotation = Some ann } }
+    { Return.{ name = rname; ty = Type.Optional (Type.Base Base.Tensor);
+               annotation = Some ann } }
   | TENSOR LPAREN ann=annotation RPAREN LBRACKET RBRACKET rname=opt_ret_name
-    { { name = rname; ty = List (Base Tensor, None); annotation = Some ann } }
+    { Return.{ name = rname; ty = Type.List (Type.Base Base.Tensor, None);
+               annotation = Some ann } }
   | ty=reg_ty rname=opt_ret_name
-    { { name = rname; ty; annotation = None } }
+    { Return.{ name = rname; ty; annotation = None } }
 ;
 
 opt_ret_name:
-  | (* empty *)   { None }
-  | s=IDENT       { Some s }
-  | s=type_kw_str { Some s }
+  | (* empty *)    { None }
+  | s=IDENT        { Some s }
+  | s=type_kw_str  { Some s }
 ;
