@@ -35,7 +35,7 @@ let () =
             Printf.printf "%-20s dispatch=%d structured=%-5b tags=[%s]\n" label
               (List.length e.Raw.dispatch)
               e.Raw.structured
-              (String.concat "," e.Raw.tags)
+              (String.concat "," (List.map Raw.Tag.to_string e.Raw.tags))
       in
       show "conv2d" "conv2d(";
       show "relu_" "relu_(";
