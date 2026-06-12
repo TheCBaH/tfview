@@ -9,7 +9,9 @@ RUN set -eux;\
   g++\
   git\
   make\
-  ripgrep\
+  python3-pip\
+  python3\
+  ripgrep\  
   time\
   wget\
   xxd\
