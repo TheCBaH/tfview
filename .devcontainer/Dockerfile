@@ -9,9 +9,11 @@ RUN set -eux;\
   g++\
   git\
   make\
-  python3-pip\
   python3\
-  ripgrep\  
+  python3-pip\
+  python3-typing-extensions\
+  python3-yaml\
+  ripgrep\
   time\
   wget\
   xxd\
