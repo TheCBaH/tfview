@@ -27,10 +27,9 @@ let as_float32 t : float32_array option =
     Some ba
 
 let pp_float32 fmt (ba : float32_array) =
-  let n = Array1.dim ba in
-  Format.pp_print_char fmt '[';
-  for i = 0 to n - 1 do
-    if i > 0 then Format.pp_print_string fmt "; ";
-    Format.fprintf fmt "%.0f" ba.{i}
-  done;
-  Format.pp_print_char fmt ']'
+  let seq = Seq.init (Array1.dim ba) (fun i -> ba.{i}) in
+  Format.fprintf fmt "[%a]"
+    (Format.pp_print_seq
+       ~pp_sep:(fun fmt () -> Format.pp_print_string fmt "; ")
+       (fun fmt v -> Format.fprintf fmt "%.0f" v))
+    seq
