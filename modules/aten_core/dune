@@ -28,13 +28,20 @@
  (action
   (run bash run_codegen.sh %{project_root}/../../modules/pytorch)))
 
-; 3. Compile c10 core+util + ATen/core + generated core srcs  ->  libaten_core.a
+; 3. Compile c10 core+util + ATen/core + generated core srcs + the extern "C"
+;    shim (shim.cpp)  ->  libaten_core.a (atc_* symbols ship in the archive)
 
 (rule
- (target libaten_core.a)
+ (targets libaten_core.a dllaten_core.so)
  (deps
   build_archive.sh
+  shim.cpp
+  shim.h
   (glob_files_rec inc/*)
   (glob_files_rec gen/*))
  (action
   (run bash build_archive.sh %{project_root}/../../modules/pytorch)))
+
+; This directory builds only the C++ artifacts (libaten_core.a +
+; dllaten_core.so + the extern "C" shim). The OCaml ctypes bindings that link
+; against them live in lib/aten.

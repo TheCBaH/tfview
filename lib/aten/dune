@@ -1,0 +1,38 @@
+; OCaml ctypes bindings over the ATen "core" C++ subset.
+;
+; The C++ artifacts (libaten_core.a, dllaten_core.so) and the shim header are
+; built in modules/aten_core; pull them into this library's build dir so
+; (foreign_archives aten_core) and the ctypes preamble #include can find them.
+; These are dune build targets (not the excluded pytorch submodule), so plain
+; cross-directory copy rules work.
+
+(rule
+ (copy ../../modules/aten_core/libaten_core.a libaten_core.a))
+
+(rule
+ (copy ../../modules/aten_core/dllaten_core.so dllaten_core.so))
+
+(rule
+ (copy ../../modules/aten_core/shim.h shim.h))
+
+(library
+ (name aten)
+ (libraries ctypes-foreign)
+ (foreign_archives aten_core)
+ (ctypes
+  (external_library_name libaten_core)
+  (build_flags_resolver
+   (vendored
+    (c_flags :standard)
+    (c_library_flags :standard -lstdc++ -lpthread)))
+  (headers
+   (preamble "#include \"shim.h\""))
+  (type_description
+   (instance Types)
+   (functor Type_description))
+  (function_description
+   (concurrency unlocked)
+   (instance Functions)
+   (functor Function_description))
+  (generated_types Types_generated)
+  (generated_entry_point C)))

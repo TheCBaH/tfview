@@ -8,7 +8,9 @@ RUN set -eux;\
   curl\
   g++\
   git\
+  libffi-dev\
   make\
+  pkg-config\
   python3\
   python3-typing-extensions\
   python3-yaml\

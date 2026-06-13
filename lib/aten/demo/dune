@@ -1,0 +1,7 @@
+(executable
+ (name main)
+ (libraries aten))
+
+(cram
+ (applies_to demo)
+ (deps main.exe))

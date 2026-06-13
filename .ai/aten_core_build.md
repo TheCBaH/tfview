@@ -72,8 +72,31 @@ small shell script so the bash stays out of the sexp and is independently runnab
 See [dune_cram_patterns.md](dune_cram_patterns.md) for the directory-target and
 `%{project_root}` mechanics that make this work.
 
-## Status / next step
+## OCaml bindings (ctypes, static stubs)
 
-Done: the closure builds end-to-end via `dune build modules/aten_core/libaten_core.a`.
-Not yet: wrap the `.a` as a dune `(foreign_archive)` so an OCaml library/executable can
-link it (that is the point at which bindings would start).
+Bindings are added incrementally, dependencies first, working toward
+`aten::add.Tensor` (per-element add: `add.Tensor(Tensor, Tensor, *, Scalar alpha=1)`
+-> `at::add`). The C++ surface is C++ (mangled, non-POD by value), so every binding
+goes through a hand-written `extern "C"` shim ([shim.h](../modules/aten_core/shim.h) /
+shim.cpp) trading only C scalars and opaque pointers. Pattern mirrors
+[TheCBaH/ocaml-ggml](https://github.com/TheCBaH/ocaml-ggml/tree/main/lib/ggml).
+
+Mechanics (no runtime `.so` loading — static linking + generated stubs):
+- `shim.cpp` is compiled into `libaten_core.a`; `build_archive.sh` also emits
+  `dllaten_core.so` (`--whole-archive`) for ctypes' bytecode path.
+- The `(library (name aten) ...)` uses dune's `(ctypes ...)` stanza:
+  `type_description.ml` (`Types` functor) + `function_description.ml` (`Functions`
+  functor, one `foreign "atc_..."` per shim fn), `(foreign_archives aten_core)`,
+  vendored resolver with `c_library_flags ... -lstdc++ -lpthread`, preamble
+  `#include "shim.h"`, `(generated_entry_point C)` -> callable as `Aten.C.Functions.*`.
+- Needs `(using ctypes 0.3)` in dune-project, opam `ctypes` + `ctypes-foreign`, and
+  apt `libffi-dev` + `pkg-config` (wired into devcontainer.json + Dockerfile).
+
+Done — **Step 0 (plumbing)**: [demo/main.ml](../modules/aten_core/demo/main.ml) calls
+two trivial c10 shims and prints `default dtype = 6, elem size = 4 bytes`
+(`ScalarType::Float`, 4 bytes); verified by [demo/demo.t](../modules/aten_core/demo/demo.t).
+No Tensor yet.
+
+Next: Step 1 bind `c10::Scalar`/`ScalarType`; Step 2 grow the C++ build from "core" to
+the full CPU `aten_cpu` (native kernels + `RegisterCPU` codegen) so factories/kernels
+link; Step 3 Tensor-handle lifecycle; Step 4 `at::add`.

@@ -24,12 +24,15 @@ INC=(-I"$PT" -I"$PT/aten/src" -Igen -Iinc
      -I"$PT/third_party/fmt/include" -I"$PT/third_party/cpuinfo/include")
 FLAGS=(-std=c++17 -Os -fPIC -DFMT_HEADER_ONLY=1)
 
-# Source list: c10 core+util, ATen/core (excluding *test*), generated core srcs.
+# Source list: c10 core+util, ATen/core (excluding *test*), generated core srcs,
+# plus our thin extern "C" shim (shim.cpp) so its atc_* symbols ship in the
+# archive for ctypes to link against.
 mapfile -t SRCS < <(
   find "$PT/c10/core" "$PT/c10/util" -maxdepth 1 -name '*.cpp' ! -name '*test*'
   find "$PT/aten/src/ATen/core" -name '*.cpp' ! -name '*test*'
   echo gen/ATen/core/ATenOpList.cpp
   echo gen/ATen/core/TensorMethods.cpp
+  echo shim.cpp
 )
 
 rm -rf obj && mkdir -p obj
@@ -37,6 +40,12 @@ printf '%s\n' "${SRCS[@]}" | xargs -P"$(nproc)" -I{} \
   bash -c 'o="obj/$(echo "$1" | tr "/" _).o"; g++ "${@:2}" -c "$1" -o "$o"' \
        _ {} "${FLAGS[@]}" "${INC[@]}"
 
-rm -f libaten_core.a
+rm -f libaten_core.a dllaten_core.so
 ar rcs libaten_core.a obj/*.o
-echo "built libaten_core.a with $(ls obj/*.o | wc -l) objects"
+# Shared variant for ctypes' bytecode/toplevel path (foreign_archives needs a
+# dll<name>.so alongside lib<name>.a). --whole-archive so every symbol is
+# present regardless of what the generated stubs reference.
+g++ -shared -o dllaten_core.so \
+  -Wl,--whole-archive libaten_core.a -Wl,--no-whole-archive \
+  -lstdc++ -lpthread
+echo "built libaten_core.a + dllaten_core.so with $(ls obj/*.o | wc -l) objects"
