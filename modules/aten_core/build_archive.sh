@@ -88,6 +88,7 @@ mapfile -t SRCS_GLUE < <(
   find "$PT/aten/src/ATen/detail" -name '*HooksInterface.cpp'
   echo stubs.cpp
   echo shim.cpp
+  echo ops.cpp
 )
 
 # layer 2+3 WITH CPU_CAPABILITY (the add/mul ufunc + DispatchStub kernels, and

@@ -15,6 +15,9 @@
 (rule
  (copy ../../modules/aten_core/shim.h shim.h))
 
+(rule
+ (copy ../../modules/aten_core/ops.h ops.h))
+
 (library
  (name aten)
  (libraries ctypes-foreign bigarray)
@@ -38,13 +41,20 @@
      -lstdc++
      -lpthread)))
   (headers
-   (preamble "#include \"shim.h\""))
+   (preamble "#include \"shim.h\"\n#include \"ops.h\""))
   (type_description
    (instance Types)
    (functor Type_description))
+  ; Tensor API (function_description.ml) and operations (operation_description.ml)
+  ; bind separately; both land under the single C entry point as C.Functions
+  ; and C.Operations. The operations half is the future autogen target.
   (function_description
    (concurrency unlocked)
    (instance Functions)
    (functor Function_description))
+  (function_description
+   (concurrency unlocked)
+   (instance Operations)
+   (functor Operation_description))
   (generated_types Types_generated)
   (generated_entry_point C)))

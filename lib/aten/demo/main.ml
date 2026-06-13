@@ -1,5 +1,6 @@
 open Ctypes
 module F = Aten.C.Functions
+module O = Aten.C.Operations
 module Stype = Aten.Scalar_type
 module T = Aten.Tensor
 
@@ -21,8 +22,8 @@ let () =
     ba.{i} <- float_of_int (i + 1)
   done;
   Bigarray.Array1.fill bb 3.0;
-  let c = F.add a b in
-  let d = F.mul a b in
+  let c = O.add a b in
+  let d = O.mul a b in
   let bc = T.as_float32 c |> Option.get in
   let bd = T.as_float32 d |> Option.get in
   let pp_shape fmt s =
@@ -43,7 +44,7 @@ let () =
   let i64 xs = CArray.of_list int64_t (List.map Int64.of_int xs) in
   let reshape_to t xs =
     let shape = i64 xs in
-    F.reshape t (CArray.start shape) (Unsigned.Size_t.of_int (List.length xs))
+    O.reshape t (CArray.start shape) (Unsigned.Size_t.of_int (List.length xs))
   in
   let r = reshape_to a [ 3; 2 ] in
   Format.printf "reshape a %a -> %a = %a\n" pp_shape (T.shape a) pp_shape
@@ -57,7 +58,7 @@ let () =
   done;
   let kernel = i64 [ 2; 2 ] in
   let pooled =
-    F.avg_pool2d img (CArray.start kernel) (Unsigned.Size_t.of_int 2)
+    O.avg_pool2d img (CArray.start kernel) (Unsigned.Size_t.of_int 2)
   in
   Format.printf "avg_pool2d %a kernel [2x2] -> %a = %a\n" pp_shape (T.shape img)
     pp_shape (T.shape pooled) T.pp_float32
