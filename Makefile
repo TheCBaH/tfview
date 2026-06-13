@@ -14,4 +14,4 @@ runtest:
 
 clean:
 	opam exec -- dune clean
-	rm -rf modules/aten_core/gen modules/aten_core/inc
+	git submodule foreach --recursive git clean -xdf
