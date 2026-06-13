@@ -6,6 +6,8 @@
 type generated = {
   c_name : string; (* the extern "C" symbol, e.g. atg_add_Tensor *)
   ocaml_name : string; (* the ctypes binding name, e.g. add_Tensor *)
+  signature : string; (* the source schema signature (for doc comments) *)
+  c_decl : string; (* the extern "C" wrapper declaration (header line) *)
   c_source : string; (* the extern "C" wrapper definition *)
   ctypes_line : string; (* the ctypes Functions-functor binding line *)
 }
@@ -50,10 +52,13 @@ let generate (op : Func_ast.t) : result =
               List.concat_map (fun (_, (m : C_type.arg)) -> m.ctypes) margs
             in
             let c_name, ocaml_name = names op in
-            let c_source =
-              Printf.sprintf
-                "atc_tensor %s(%s) {\n  return atc_wrap(at::%s(%s));\n}" c_name
+            let proto =
+              Printf.sprintf "atc_tensor %s(%s)" c_name
                 (String.concat ", " c_params)
+            in
+            let c_decl = proto ^ ";" in
+            let c_source =
+              Printf.sprintf "%s {\n  return atc_wrap(at::%s(%s));\n}" proto
                 op.name.base
                 (String.concat ", " call_args)
             in
@@ -64,4 +69,6 @@ let generate (op : Func_ast.t) : result =
                 ocaml_name c_name
                 (String.concat " @-> " ctypes_in)
             in
-            Generated { c_name; ocaml_name; c_source; ctypes_line })
+            let signature = Format.asprintf "%a" Func_ast.pp op in
+            Generated
+              { c_name; ocaml_name; signature; c_decl; c_source; ctypes_line })
