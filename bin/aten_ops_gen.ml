@@ -30,6 +30,7 @@ let selection =
     Allow { base = "relu_"; overload = None };
     Allow { base = "reshape"; overload = None };
     Allow { base = "flatten"; overload = Some "using_ints" };
+    Allow { base = "max_pool2d"; overload = None };
     Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
   ]
 
@@ -66,8 +67,13 @@ let find_entry (entries : Raw.t list) ~base ~overload : Raw.t =
       let ov = match overload with None -> "" | Some s -> "." ^ s in
       die "no native_functions.yaml entry for op %s%s" base ov
 
+(* torchgen defaults an absent [variants] to "function", so emit a free-function
+   call unless the op is explicitly method-only (a non-empty list without
+   Function, e.g. in-place add_). *)
 let style_of (e : Raw.t) =
-  if List.mem Raw.Variant.Function e.variants then `Function else `Method
+  match e.variants with
+  | [] -> `Function
+  | vs -> if List.mem Raw.Variant.Function vs then `Function else `Method
 
 let resolve (entries : Raw.t list) : Aten_gen.Gen.generated list =
   List.map

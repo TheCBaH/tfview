@@ -90,6 +90,17 @@ let () =
   Format.printf "avg_pool2d %a kernel [2x2] -> %a = %a\n" pp_shape (T.shape img)
     pp_shape (T.shape pooled) T.pp_float32
     (T.as_float32 pooled |> Option.get);
+  (* max_pool2d: same 1x1x4x4, 2x2 kernel/stride, pad 0, dil 1 -> block maxima
+     6/8/14/16. *)
+  let mp_k = i64 [ 2; 2 ] and mp_s = i64 [ 2; 2 ] in
+  let mp_p = i64 [ 0; 0 ] and mp_d = i64 [ 1; 1 ] in
+  let maxed =
+    O.max_pool2d img (CArray.start mp_k) 2 (CArray.start mp_s) 2
+      (CArray.start mp_p) 2 (CArray.start mp_d) 2 false
+  in
+  Format.printf "max_pool2d %a kernel [2x2] -> %a = %a\n" pp_shape (T.shape img)
+    pp_shape (T.shape maxed) T.pp_float32
+    (T.as_float32 maxed |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -103,4 +114,5 @@ let () =
   F.free r;
   F.free fl;
   F.free img;
-  F.free pooled
+  F.free pooled;
+  F.free maxed

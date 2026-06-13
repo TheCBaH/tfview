@@ -94,6 +94,10 @@ mapfile -t SRCS_GLUE < <(
   # lives in TensorCompare.cpp (already in the CAP list below). Activation.cpp
   # has no vec.h; its other activation stubs --gc-section away unreached.
   echo "$PT/aten/src/ATen/native/Activation.cpp"
+  # max_pool2d: composite (Pooling.cpp) -> max_pool2d_with_indices structured
+  # meta+impl (DilatedMaxPool2d.cpp); the MaxPoolKernel is in the CAP list.
+  echo "$PT/aten/src/ATen/native/Pooling.cpp"
+  echo "$PT/aten/src/ATen/native/DilatedMaxPool2d.cpp"
   echo "$PT/aten/src/ATen/cpu/FlushDenormal.cpp"
   echo "$PT/aten/src/ATen/quantized/QTensorImpl.cpp"
   echo "$PT/aten/src/ATen/native/sparse/SparseTensor.cpp"
@@ -116,6 +120,8 @@ mapfile -t SRCS_CAP < <(
   echo "$PT/aten/src/ATen/native/cpu/FillKernel.cpp"
   # clamp_min_scalar_stub (used by relu via clamp_min in TensorCompare.cpp).
   echo "$PT/aten/src/ATen/native/cpu/TensorCompareKernel.cpp"
+  # max_pool2d_kernel (the vectorized pooling kernel).
+  echo "$PT/aten/src/ATen/native/cpu/MaxPoolKernel.cpp"
   # REGISTER_DISPATCH(avg_pool2d_kernel, ...) — the vectorized pooling kernel.
   echo "$PT/aten/src/ATen/native/cpu/AvgPoolKernel.cpp"
 )

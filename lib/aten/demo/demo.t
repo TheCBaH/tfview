@@ -6,7 +6,8 @@ e+=b exercises in-place add_ (e is 10..15, += b of 3 -> 13..18). relu/relu_
 clamp negatives to 0. reshape exercises the SymInt[] path (2x3 -> 3x2, a
 storage-sharing view); flatten collapses 2x3 -> 1D [6]; avg_pool2d is a real
 compute kernel (1x1x4x4 of 1..16, 2x2 kernel -> the four block means
-3.5/5.5/11.5/13.5).
+3.5/5.5/11.5/13.5); max_pool2d on the same input gives the block maxima
+6/8/14/16.
 
   $ ./main.exe
   default dtype = 6, elem size = 4 bytes
@@ -20,3 +21,4 @@ compute kernel (1x1x4x4 of 1..16, 2x2 kernel -> the four block means
   reshape a [2x3] -> [3x2] = [1; 2; 3; 4; 5; 6]
   flatten a [2x3] -> [6] = [1; 2; 3; 4; 5; 6]
   avg_pool2d [1x1x4x4] kernel [2x2] -> [1x1x2x2] = [3.5; 5.5; 11.5; 13.5]
+  max_pool2d [1x1x4x4] kernel [2x2] -> [1x1x2x2] = [6; 8; 14; 16]
