@@ -1,1 +1,4 @@
 _build/
+
+# Claude Code user-local settings (team shares memory and rules via .claude/settings.json)
+.claude/settings.local.json
