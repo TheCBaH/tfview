@@ -45,16 +45,10 @@ void atc_free(atc_tensor t) { delete atc_to_ptr(t); }
 
 int64_t atc_numel(atc_tensor t) { return atc_to_ptr(t)->numel(); }
 
-float* atc_data_float(atc_tensor t) {
-  return static_cast<float*>(
-      atc_to_ptr(t)->unsafeGetTensorImpl()->storage().mutable_data());
-}
-
-void atc_fill_float(atc_tensor t, float v) {
+void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype) {
   auto* a = atc_to_ptr(t);
-  auto* p = static_cast<float*>(a->unsafeGetTensorImpl()->storage().mutable_data());
-  int64_t n = a->numel();
-  for (int64_t i = 0; i < n; ++i) p[i] = v;
+  if (a->scalar_type() != static_cast<c10::ScalarType>(dtype)) return nullptr;
+  return a->unsafeGetTensorImpl()->storage().mutable_data();
 }
 
 atc_tensor atc_add_float(atc_tensor a, atc_tensor b) {

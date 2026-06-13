@@ -17,7 +17,7 @@
 
 (library
  (name aten)
- (libraries ctypes-foreign)
+ (libraries ctypes-foreign bigarray)
  (foreign_archives aten_core)
  (ctypes
   (external_library_name libaten_core)

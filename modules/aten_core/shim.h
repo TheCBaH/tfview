@@ -46,11 +46,9 @@ void atc_free(atc_tensor t);
 /* Number of elements. */
 int64_t atc_numel(atc_tensor t);
 
-/* Pointer to the contiguous float32 element buffer (read/write). */
-float* atc_data_float(atc_tensor t);
-
-/* Scalar op: set every element to v. */
-void atc_fill_float(atc_tensor t, float v);
+/* Raw data pointer, checking that the tensor's dtype matches.
+   Returns NULL on mismatch; the caller casts to the appropriate element type. */
+void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
 
 /* Elementwise a + b into a fresh tensor (shapes must match). */
 atc_tensor atc_add_float(atc_tensor a, atc_tensor b);

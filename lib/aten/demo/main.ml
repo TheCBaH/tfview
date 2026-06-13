@@ -1,9 +1,7 @@
-(* Step 2 smoke test: build CPU tensors and run ops from OCaml, through
-   the minimal c10-based tensor runtime in the shim. *)
-
 open Ctypes
 module F = Aten.C.Functions
 module Stype = Aten.Scalar_type
+module T = Aten.Tensor
 
 let make ?(dtype = Stype.Float) shape =
   let n = Array.length shape in
@@ -12,35 +10,25 @@ let make ?(dtype = Stype.Float) shape =
   in
   F.new_ (CArray.start sizes) (Unsigned.Size_t.of_int n) (Stype.to_int dtype)
 
-let numel t = Int64.to_int (F.numel t)
-
-let init t f =
-  let p = F.data_float t in
-  for i = 0 to numel t - 1 do
-    p +@ i <-@ f i
-  done
-
-let to_list t =
-  let p = F.data_float t in
-  List.init (numel t) (fun i -> !@(p +@ i))
-
-let show name t =
-  Printf.printf "%s = [%s]\n" name
-    (String.concat "; " (List.map (Printf.sprintf "%.0f") (to_list t)))
-
 let () =
   let dt = F.default_dtype () in
-  Printf.printf "default dtype = %d, elem size = %d bytes\n" dt
+  Format.printf "default dtype = %d, elem size = %d bytes\n" dt
     (Unsigned.Size_t.to_int (F.dtype_elem_size dt));
   let a = make [| 2; 3 |] and b = make [| 2; 3 |] in
-  init a (fun i -> float_of_int (i + 1));
-  F.fill_float b 3.0;
+  let ba = T.as_float32 a |> Option.get in
+  let bb = T.as_float32 b |> Option.get in
+  for i = 0 to Bigarray.Array1.dim ba - 1 do
+    ba.{i} <- float_of_int (i + 1)
+  done;
+  Bigarray.Array1.fill bb 3.0;
   let c = F.add_float a b in
   let d = F.mul a b in
-  show "a" a;
-  show "b" b;
-  show "a+b" c;
-  show "a*b" d;
+  let bc = T.as_float32 c |> Option.get in
+  let bd = T.as_float32 d |> Option.get in
+  Format.printf "a = %a\n" T.pp_float32 ba;
+  Format.printf "b = %a\n" T.pp_float32 bb;
+  Format.printf "a+b = %a\n" T.pp_float32 bc;
+  Format.printf "a*b = %a\n" T.pp_float32 bd;
   F.free a;
   F.free b;
   F.free c;

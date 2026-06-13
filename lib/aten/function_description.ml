@@ -1,8 +1,12 @@
 open Ctypes
 
-(* atc_tensor is `struct atc_tensor_opaque*` on the C side (shim.h).
-   All pointer types share the same ABI, so we bind it as a named alias. *)
-let atc_tensor = ptr void
+(* atc_tensor is `struct atc_tensor_opaque*` in shim.h.  We model it as a
+   pointer to an unsealed OCaml structure (no sizeof needed — the struct is
+   forward-declared in C and we only pass it by pointer). *)
+type tensor_opaque
+
+let tensor_opaque : tensor_opaque structure typ = structure "atc_tensor_opaque"
+let atc_tensor = ptr tensor_opaque
 
 module Functions (F : Ctypes.FOREIGN) = struct
   open F
@@ -19,11 +23,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let free = foreign "atc_free" (atc_tensor @-> returning void)
   let numel = foreign "atc_numel" (atc_tensor @-> returning int64_t)
 
-  let data_float =
-    foreign "atc_data_float" (atc_tensor @-> returning (ptr float))
-
-  let fill_float =
-    foreign "atc_fill_float" (atc_tensor @-> float @-> returning void)
+  let data_ptr =
+    foreign "atc_data_ptr" (atc_tensor @-> int8_t @-> returning (ptr void))
 
   let add_float =
     foreign "atc_add_float" (atc_tensor @-> atc_tensor @-> returning atc_tensor)
