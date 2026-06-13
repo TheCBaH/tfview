@@ -40,6 +40,14 @@ let () =
   show "b" b bb;
   show "a+b" c bc;
   show "a*b" d bd;
+  (* in-place add_: e (10..15) += b (3) -> 13..18; returns a handle to e. *)
+  let e = make [| 2; 3 |] in
+  let be = T.as_float32 e |> Option.get in
+  for i = 0 to Bigarray.Array1.dim be - 1 do
+    be.{i} <- float_of_int (10 + i)
+  done;
+  let e' = O.add__Tensor e b 1.0 in
+  show "e+=b" e' (T.as_float32 e' |> Option.get);
   (* SymInt[]: reshape the 2x3 tensor 'a' to 3x2 (a view; shares storage). *)
   let i64 xs = CArray.of_list int64_t (List.map Int64.of_int xs) in
   let reshape_to t xs =
@@ -50,6 +58,11 @@ let () =
   Format.printf "reshape a %a -> %a = %a\n" pp_shape (T.shape a) pp_shape
     (T.shape r) T.pp_float32
     (T.as_float32 r |> Option.get);
+  (* flatten using_ints: 2x3 -> 1D [6] (start_dim=0, end_dim=-1). *)
+  let fl = O.flatten_using_ints a 0L (-1L) in
+  Format.printf "flatten a %a -> %a = %a\n" pp_shape (T.shape a) pp_shape
+    (T.shape fl) T.pp_float32
+    (T.as_float32 fl |> Option.get);
   (* avg_pool2d: 1x1x4x4 input of 1..16, 2x2 kernel -> 1x1x2x2 block means. *)
   let img = make [| 1; 1; 4; 4 |] in
   let bimg = T.as_float32 img |> Option.get in
@@ -65,6 +78,9 @@ let () =
   F.free b;
   F.free c;
   F.free d;
+  F.free e;
+  F.free e';
   F.free r;
+  F.free fl;
   F.free img;
   F.free pooled
