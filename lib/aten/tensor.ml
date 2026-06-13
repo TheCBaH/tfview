@@ -19,11 +19,7 @@ let as_float32 t : float32_array option =
   else
     let fp = from_voidp float vp in
     let ba = bigarray_of_ptr array1 n float32 fp in
-    Gc.finalise
-      (fun _ ->
-        let _ = t in
-        ())
-      ba;
+    Gc.finalise (fun _ -> ignore t) ba;
     Some ba
 
 let pp_float32 fmt (ba : float32_array) =
