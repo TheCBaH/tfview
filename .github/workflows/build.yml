@@ -29,7 +29,7 @@ jobs:
     # writes to are the same files. Keyed by month + the pinned PyTorch commit;
     # the restore-keys prefix lets a new commit warm-start from the prior cache.
     - name: ccache cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .ccache
         key: ccache-${{ steps.cache_keys.outputs.month }}-${{ steps.cache_keys.outputs.pytorch }}
