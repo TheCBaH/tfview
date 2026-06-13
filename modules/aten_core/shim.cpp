@@ -1,5 +1,7 @@
 #include "shim.h"
 
+#include <algorithm>
+
 #include <ATen/Functions.h>
 #include <c10/core/CPUAllocator.h>
 #include <c10/core/DefaultDtype.h>
@@ -46,6 +48,13 @@ void atc_free(atc_tensor t) { delete atc_to_ptr(t); }
 
 int64_t atc_numel(atc_tensor t) { return atc_to_ptr(t)->numel(); }
 
+size_t atc_dim(atc_tensor t) { return static_cast<size_t>(atc_to_ptr(t)->dim()); }
+
+void atc_sizes(atc_tensor t, int64_t* out) {
+  auto sizes = atc_to_ptr(t)->sizes();
+  std::copy(sizes.begin(), sizes.end(), out);
+}
+
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype) {
   auto* a = atc_to_ptr(t);
   if (a->scalar_type() != static_cast<c10::ScalarType>(dtype)) return nullptr;
@@ -58,6 +67,15 @@ atc_tensor atc_add(atc_tensor a, atc_tensor b) {
 
 atc_tensor atc_mul(atc_tensor a, atc_tensor b) {
   return atc_wrap(at::mul(*atc_to_ptr(a), *atc_to_ptr(b)));
+}
+
+atc_tensor atc_reshape(atc_tensor t, const int64_t* shape, size_t ndim) {
+  return atc_wrap(at::reshape(*atc_to_ptr(t), at::IntArrayRef(shape, ndim)));
+}
+
+atc_tensor atc_avg_pool2d(atc_tensor t, const int64_t* kernel, size_t klen) {
+  return atc_wrap(
+      at::avg_pool2d(*atc_to_ptr(t), at::IntArrayRef(kernel, klen)));
 }
 
 }  // extern "C"

@@ -46,6 +46,13 @@ void atc_free(atc_tensor t);
 /* Number of elements. */
 int64_t atc_numel(atc_tensor t);
 
+/* Number of dimensions (rank). */
+size_t atc_dim(atc_tensor t);
+
+/* Write the tensor's shape (its [atc_dim] sizes) into [out]; the caller sizes
+   the buffer using [atc_dim]. */
+void atc_sizes(atc_tensor t, int64_t* out);
+
 /* Raw data pointer, checking that the tensor's dtype matches.
    Returns NULL on mismatch; the caller casts to the appropriate element type. */
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
@@ -56,6 +63,16 @@ atc_tensor atc_add(atc_tensor a, atc_tensor b);
 
 /* Elementwise a * b via the real ATen kernel (at::mul). Returns a fresh tensor. */
 atc_tensor atc_mul(atc_tensor a, atc_tensor b);
+
+/* Reshape [t] to [shape] (ndim entries) via at::reshape. In the ATen schema
+   the shape is a SymInt[]; on this concrete-shape CPU path it is plain int64.
+   Shares storage when possible. Returns a fresh handle. */
+atc_tensor atc_reshape(atc_tensor t, const int64_t* shape, size_t ndim);
+
+/* 2D average pooling (at::avg_pool2d) over a 4D NCHW (or 3D CHW) tensor with
+   the given square-ish [kernel] (klen entries, typically 2). Stride defaults
+   to the kernel size, padding 0. Returns a fresh tensor. */
+atc_tensor atc_avg_pool2d(atc_tensor t, const int64_t* kernel, size_t klen);
 
 #ifdef __cplusplus
 }

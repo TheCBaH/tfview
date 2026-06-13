@@ -6,6 +6,13 @@ type float32_array = (float, float32_elt, c_layout) Array1.t
 
 let numel t = Int64.to_int (F.numel t)
 
+(* The tensor's shape as an int array (length = rank). *)
+let shape t =
+  let n = Unsigned.Size_t.to_int (F.dim t) in
+  let out = CArray.make int64_t n in
+  F.sizes t (CArray.start out);
+  Array.init n (fun i -> Int64.to_int (CArray.get out i))
+
 (* Return a Bigarray view over the tensor's contiguous buffer if its dtype
    matches [dtype], or None on mismatch.  The view shares memory with the
    tensor — the caller must not free the tensor while the view is live.
@@ -27,5 +34,5 @@ let pp_float32 fmt (ba : float32_array) =
   Format.fprintf fmt "[%a]"
     (Format.pp_print_seq
        ~pp_sep:(fun fmt () -> Format.pp_print_string fmt "; ")
-       (fun fmt v -> Format.fprintf fmt "%.0f" v))
+       (fun fmt v -> Format.fprintf fmt "%g" v))
     seq

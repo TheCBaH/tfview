@@ -31,7 +31,10 @@ let map_type ~name (ty : Func_ast.Type.t) : arg option =
           call_expr = Printf.sprintf "*atc_to_ptr(%s)" name;
           ctypes = [ "atc_tensor" ];
         }
-  | Base Int ->
+  (* SymInt is the symbolic-shape int; calling the non-_symint [at::<op>]
+     frontend overload accepts a plain int64_t, so we bind it identically to
+     a concrete int. (Symbolic values are never produced on this CPU path.) *)
+  | Base Int | Base SymInt ->
       Some
         {
           c_params = [ Printf.sprintf "int64_t %s" name ];
@@ -79,7 +82,9 @@ let map_type ~name (ty : Func_ast.Type.t) : arg option =
               name;
           ctypes = [ "atc_tensor" ];
         }
-  | List (Base Int, _) ->
+  (* Int[] and SymInt[] both bind to the non-_symint [at::<op>] overload, which
+     takes an at::IntArrayRef; pass it as a (data, length) pair. *)
+  | List (Base Int, _) | List (Base SymInt, _) ->
       Some
         {
           c_params =

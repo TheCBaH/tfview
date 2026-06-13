@@ -22,6 +22,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let free = foreign "atc_free" (atc_tensor @-> returning void)
   let numel = foreign "atc_numel" (atc_tensor @-> returning int64_t)
+  let dim = foreign "atc_dim" (atc_tensor @-> returning size_t)
+  let sizes = foreign "atc_sizes" (atc_tensor @-> ptr int64_t @-> returning void)
 
   let data_ptr =
     foreign "atc_data_ptr" (atc_tensor @-> int8_t @-> returning (ptr void))
@@ -31,4 +33,12 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let mul =
     foreign "atc_mul" (atc_tensor @-> atc_tensor @-> returning atc_tensor)
+
+  let reshape =
+    foreign "atc_reshape"
+      (atc_tensor @-> ptr int64_t @-> size_t @-> returning atc_tensor)
+
+  let avg_pool2d =
+    foreign "atc_avg_pool2d"
+      (atc_tensor @-> ptr int64_t @-> size_t @-> returning atc_tensor)
 end
