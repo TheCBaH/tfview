@@ -28,3 +28,13 @@ jobs:
     - name: format
       run: |
         ${{ env.EXEC }} make format
+    - name: verify pristine
+      run: |
+        ${{ env.EXEC }} bash -c '
+          git_status=$(git status --porcelain)
+          if [ -n "$git_status" ]; then
+            echo "Git directory is not pristine. Modified or created files:"
+            echo "$git_status"
+            exit 1
+          fi
+        '
