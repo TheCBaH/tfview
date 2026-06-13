@@ -1,22 +1,53 @@
-; OCaml ctypes bindings over the ATen "core" C++ subset.
+; OCaml ctypes bindings over the ATen "core" C++ subset, built together with the
+; C++ artifacts they bind. The shim/ops sources and the libaten_core.a /
+; dllaten_core.so they compile to all live in THIS directory, so the library
+; picks them up directly — no cross-directory copy rules.
 ;
-; The C++ artifacts (libaten_core.a, dllaten_core.so) and the shim header are
-; built in modules/aten_core; pull them into this library's build dir so
-; (foreign_archives aten_core) and the ctypes preamble #include can find them.
-; These are dune build targets (not the excluded pytorch submodule), so plain
-; cross-directory copy rules work.
+; modules/pytorch is a git submodule excluded from dune's scan, so we reach it
+; with %{project_root}/../../modules/pytorch (same idiom as data/dune; the path
+; is depth-independent). The submodule sources are NOT dep-tracked by dune;
+; `touch` a rule input or run `dune clean` to force a rebuild when the PyTorch
+; checkout changes.
+;
+; Prerequisite (one-time): the fmt + cpuinfo third-party submodules must be
+; checked out (run inside modules/pytorch):
+;   git submodule update --init third_party/fmt third_party/cpuinfo
+
+; 1. Generated config header  ->  inc/c10/macros/cmake_macros.h
 
 (rule
- (copy ../../modules/aten_core/libaten_core.a libaten_core.a))
+ (targets
+  (dir inc))
+ (deps gen_macros.sh)
+ (action
+  (run bash gen_macros.sh %{project_root}/../../modules/pytorch)))
+
+; 2. torchgen codegen  ->  gen/ATen/{core/TensorBody.h, core/ATenOpList.cpp, ...}
 
 (rule
- (copy ../../modules/aten_core/dllaten_core.so dllaten_core.so))
+ (targets
+  (dir gen))
+ (deps run_codegen.sh)
+ (action
+  (run bash run_codegen.sh %{project_root}/../../modules/pytorch)))
+
+; 3. Compile c10 core+util + ATen/core + generated core srcs + the extern "C"
+;    shim (shim.cpp = Tensor API, ops.cpp = operations)  ->  libaten_core.a /
+;    dllaten_core.so (atc_* symbols ship in the archive).
 
 (rule
- (copy ../../modules/aten_core/shim.h shim.h))
-
-(rule
- (copy ../../modules/aten_core/ops.h ops.h))
+ (targets libaten_core.a dllaten_core.so)
+ (deps
+  build_archive.sh
+  shim.cpp
+  shim.h
+  ops.cpp
+  ops.h
+  stubs.cpp
+  (glob_files_rec inc/*)
+  (glob_files_rec gen/*))
+ (action
+  (run bash build_archive.sh %{project_root}/../../modules/pytorch)))
 
 (library
  (name aten)

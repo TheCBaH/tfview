@@ -9,7 +9,7 @@ metadata:
 
 Investigated 2026-06-13 for a dispatch-free path to real ATen compute (see [[aten-core-build-closure]]).
 
-**SHIPPED 2026-06-13**: real `at::add`/`at::mul` now run through OCaml (demo prints `a+b`/`a*b` from genuine ATen kernels, dispatch-free). Toolchain requirement captured in [[aten-clang-lld-toolchain]]. The bounded build (`modules/aten_core`):
+**SHIPPED 2026-06-13**: real `at::add`/`at::mul` now run through OCaml (demo prints `a+b`/`a*b` from genuine ATen kernels, dispatch-free). Toolchain requirement captured in [[aten-clang-lld-toolchain]]. The bounded build (C++ sources + scripts now in `lib/aten/`, built in-place with the ctypes library — no copy rules; `modules/` is submodules-only):
 - `run_codegen.sh`: `--static-dispatch-backend CPU --skip-dispatcher-op-registration`.
 - `gen_macros.sh`: also generates `ATen/Config.h` (all features 0, `AT_PARALLEL_NATIVE=1`).
 - `build_archive.sh`: core c10+ATen/core (monolithic, NO sections) + section-split glue (`Operators_*`, `RegisterCPU_*`, `RegisterComposite*_0`, `TensorMethods`, `UfuncCPU{,Kernel}_add`) + native closure (TensorIterator, Parallel*, factories/shape/conversions, BinaryOps + BinaryOpsKernel/FillKernel = mul/fill stubs) compiled scalar (`-DCPU_CAPABILITY_DEFAULT`) + `stubs.cpp` + cpuinfo (cmake, merged via `ar -M ADDLIB` to preserve cpuinfo's duplicate `cache.c.o` members).

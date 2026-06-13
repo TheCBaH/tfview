@@ -1,8 +1,9 @@
 # Building the ATen "core" C++ subset
 
 Goal: compile a minimal slice of PyTorch's C++ (`modules/pytorch`) into a static
-archive `libaten_core.a`, with **no OCaml bindings yet** — just prove the closure
-builds under dune. Lives in [`modules/aten_core/`](../modules/aten_core/).
+archive `libaten_core.a`. The C++ sources and build scripts live alongside the
+OCaml bindings in [`lib/aten/`](../lib/aten/) (so the library picks up the
+artifacts directly — no cross-directory copies).
 
 ## What "core" means (and what it is NOT)
 
@@ -71,14 +72,17 @@ Include roots:
 
 ## Dune wiring
 
-Three rules in [`modules/aten_core/dune`](../modules/aten_core/dune), each backed by a
+Three rules in [`lib/aten/dune`](../lib/aten/dune), each backed by a
 small shell script so the bash stays out of the sexp and is independently runnable:
 
 | Rule | Output | Script |
 |---|---|---|
 | 1 | `inc/` (dir target) | `gen_macros.sh` — sed the `.in` |
 | 2 | `gen/` (dir target) | `run_codegen.sh` — torchgen |
-| 3 | `libaten_core.a` | `build_archive.sh` — `g++ -Os` + `ar` |
+| 3 | `libaten_core.a` + `dllaten_core.so` | `build_archive.sh` — `clang++ -Os` + `ar` |
+
+These rules emit the archive into `lib/aten/`'s build dir, exactly where the
+`(library (name aten) ...)` stanza's `(foreign_archives aten_core)` looks for it.
 
 See [dune_cram_patterns.md](dune_cram_patterns.md) for the directory-target and
 `%{project_root}` mechanics that make this work.
@@ -88,8 +92,9 @@ See [dune_cram_patterns.md](dune_cram_patterns.md) for the directory-target and
 Bindings are added incrementally, dependencies first, working toward
 `aten::add.Tensor` (per-element add: `add.Tensor(Tensor, Tensor, *, Scalar alpha=1)`
 -> `at::add`). The C++ surface is C++ (mangled, non-POD by value), so every binding
-goes through a hand-written `extern "C"` shim ([shim.h](../modules/aten_core/shim.h) /
-shim.cpp) trading only C scalars and opaque pointers. Pattern mirrors
+goes through a hand-written `extern "C"` shim ([shim.h](../lib/aten/shim.h) /
+shim.cpp = Tensor API; [ops.h](../lib/aten/ops.h) / ops.cpp = operations)
+trading only C scalars and opaque pointers. Pattern mirrors
 [TheCBaH/ocaml-ggml](https://github.com/TheCBaH/ocaml-ggml/tree/main/lib/ggml).
 
 Mechanics (no runtime `.so` loading — static linking + generated stubs):
@@ -103,11 +108,11 @@ Mechanics (no runtime `.so` loading — static linking + generated stubs):
 - Needs `(using ctypes 0.3)` in dune-project, opam `ctypes` + `ctypes-foreign`, and
   apt `libffi-dev` + `pkg-config` (wired into devcontainer.json + Dockerfile).
 
-The library + demo live in [lib/aten/](../lib/aten/) (binding) and
-[lib/aten/demo/](../lib/aten/demo/); `modules/aten_core/` builds only the C++
-artifacts. lib/aten pulls `libaten_core.a` / `dllaten_core.so` / `shim.h` from
-modules/aten_core via plain cross-dir copy rules (these are dune targets, not the
-excluded pytorch submodule).
+The library, its C++ sources, and the demo all live under [lib/aten/](../lib/aten/)
+(binding) and [lib/aten/demo/](../lib/aten/demo/). Because the archive rules and
+the library share one directory, `libaten_core.a` / `dllaten_core.so` are produced
+right where `(foreign_archives aten_core)` and the preamble `#include "shim.h"`
+need them — no copy rules. (`modules/` is reserved for git submodules.)
 
 Done — **Step 0 (plumbing)** + **Step 2 (minimal tensor runtime)**: the shim now
 exposes `atc_new_float` / `atc_free` / `atc_numel` / `atc_data_float` /

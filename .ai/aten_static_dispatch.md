@@ -105,4 +105,4 @@ Real `TensorIterator`-based CPU ops are reachable **dispatch-free and
 SIMD-free**, at the cost of `TensorIterator`'s closure (~30 native files +
 cpuinfo) and a cold-path stub TU. The cost driver is `TensorIterator`, never
 dispatch or the add kernel. When the generator needs a real op, this is the
-recipe to grow `modules/aten_core` by.
+recipe to grow `lib/aten` (the C++ shim/build) by.
