@@ -16,7 +16,7 @@ let%expect_test "add.Tensor" =
   [%expect
     {|
     atc_tensor atg_add_Tensor(atc_tensor self, atc_tensor other, double alpha) {
-      return atc_wrap(at::add(*reinterpret_cast<at::Tensor*>(self), *reinterpret_cast<at::Tensor*>(other), c10::Scalar(alpha)));
+      return atc_wrap(at::add(*atc_to_ptr(self), *atc_to_ptr(other), c10::Scalar(alpha)));
     }
     ---
     let add_Tensor = foreign "atg_add_Tensor" (atc_tensor @-> atc_tensor @-> double @-> returning atc_tensor) |}]
@@ -26,7 +26,7 @@ let%expect_test "mul.Tensor" =
   [%expect
     {|
     atc_tensor atg_mul_Tensor(atc_tensor self, atc_tensor other) {
-      return atc_wrap(at::mul(*reinterpret_cast<at::Tensor*>(self), *reinterpret_cast<at::Tensor*>(other)));
+      return atc_wrap(at::mul(*atc_to_ptr(self), *atc_to_ptr(other)));
     }
     ---
     let mul_Tensor = foreign "atg_mul_Tensor" (atc_tensor @-> atc_tensor @-> returning atc_tensor) |}]

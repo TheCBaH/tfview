@@ -28,7 +28,7 @@ let map_type ~name (ty : Func_ast.Type.t) : arg option =
       Some
         {
           c_params = [ Printf.sprintf "atc_tensor %s" name ];
-          call_expr = Printf.sprintf "*reinterpret_cast<at::Tensor*>(%s)" name;
+          call_expr = Printf.sprintf "*atc_to_ptr(%s)" name;
           ctypes = [ "atc_tensor" ];
         }
   | Base Int ->
@@ -75,9 +75,8 @@ let map_type ~name (ty : Func_ast.Type.t) : arg option =
           c_params = [ Printf.sprintf "atc_tensor %s" name ];
           call_expr =
             Printf.sprintf
-              "%s ? std::make_optional(*reinterpret_cast<at::Tensor*>(%s)) : \
-               std::nullopt"
-              name name;
+              "%s ? std::make_optional(*atc_to_ptr(%s)) : std::nullopt" name
+              name;
           ctypes = [ "atc_tensor" ];
         }
   | List (Base Int, _) ->
