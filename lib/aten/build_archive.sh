@@ -28,6 +28,14 @@
 set -euo pipefail
 PT=$(cd "$1" && pwd)
 
+# Use ccache as a compiler launcher when it is on PATH. This is what makes the
+# 194-object ATen compile cheap to rebuild: in CI the CCACHE_DIR is persisted
+# through the GitHub Actions cache (see .github/workflows/build.yml), so an
+# unchanged PyTorch checkout recompiles from cache. Harmless no-op when ccache
+# is not installed: $CCACHE expands to nothing and clang++ runs directly.
+CCACHE="$(command -v ccache || true)"
+export CCACHE
+
 for need in "$PT/third_party/fmt/include/fmt/core.h" \
             "$PT/third_party/cpuinfo/include/cpuinfo.h" \
             "$PT/third_party/cpuinfo/CMakeLists.txt"; do
@@ -110,7 +118,7 @@ mapfile -t SRCS_CAP < <(
 rm -rf obj && mkdir -p obj
 compile_list() {  # extra flags as args; source paths via stdin
   xargs -P"$(nproc)" -I{} \
-    bash -c 'o="obj/$(echo "$1" | tr "/" _).o"; clang++ "${@:2}" -c "$1" -o "$o"' \
+    bash -c 'o="obj/$(echo "$1" | tr "/" _).o"; $CCACHE clang++ "${@:2}" -c "$1" -o "$o"' \
          _ {} "$@"
 }
 printf '%s\n' "${SRCS_CORE[@]}" | compile_list "${FLAGS[@]}" "${INC[@]}"
@@ -118,7 +126,11 @@ printf '%s\n' "${SRCS_GLUE[@]}" | compile_list "${FLAGS[@]}" "${SECT[@]}" "${INC
 printf '%s\n' "${SRCS_CAP[@]}"  | compile_list "${FLAGS[@]}" "${SECT[@]}" "${CAP[@]}" "${INC[@]}"
 
 # --- cpuinfo (static, PIC) --------------------------------------------------
-cmake -S "$PT/third_party/cpuinfo" -B cpuinfo-build \
+CMAKE_LAUNCHER=()
+if [ -n "$CCACHE" ]; then
+  CMAKE_LAUNCHER=(-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache)
+fi
+cmake -S "$PT/third_party/cpuinfo" -B cpuinfo-build "${CMAKE_LAUNCHER[@]}" \
   -DCPUINFO_LIBRARY_TYPE=static -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
   -DCPUINFO_BUILD_UNIT_TESTS=OFF -DCPUINFO_BUILD_MOCK_TESTS=OFF \
   -DCPUINFO_BUILD_BENCHMARKS=OFF -DCPUINFO_BUILD_TOOLS=OFF \

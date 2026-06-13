@@ -19,9 +19,29 @@ jobs:
     - name: setup
       run: |
         echo 'EXEC=${{ steps.devcontainer.outputs.exec }}' >> $GITHUB_ENV
+    - name: cache keys
+      id: cache_keys
+      run: |
+        echo "pytorch=$(git rev-parse HEAD:modules/pytorch)" >> $GITHUB_OUTPUT
+        echo "month=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
+    # .ccache lives at the repo root, which the devcontainer bind-mounts, so the
+    # host directory actions/cache manages and the CCACHE_DIR the container
+    # writes to are the same files. Keyed by month + the pinned PyTorch commit;
+    # the restore-keys prefix lets a new commit warm-start from the prior cache.
+    - name: ccache cache
+      uses: actions/cache@v4
+      with:
+        path: .ccache
+        key: ccache-${{ steps.cache_keys.outputs.month }}-${{ steps.cache_keys.outputs.pytorch }}
+        restore-keys: |
+          ccache-${{ steps.cache_keys.outputs.month }}-
     - name: build
       run: |
-        ${{ env.EXEC }} make build BUILD_OPTIONS='--display short'
+        mkdir -p .ccache
+        ${{ env.EXEC }} sh -ceu 'CCACHE_DIR="$(pwd)/.ccache" CCACHE_MAXSIZE=1G make build BUILD_OPTIONS="--display short"'
+    - name: ccache stats
+      run: |
+        ${{ env.EXEC }} sh -ceu 'CCACHE_DIR="$(pwd)/.ccache" ccache -s'
     - name: test
       run: |
         ${{ env.EXEC }} make runtest

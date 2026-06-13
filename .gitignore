@@ -1,5 +1,8 @@
 _build/
 
+# ccache directory; persisted across CI runs via the GitHub Actions cache
+.ccache/
+
 # Claude Code user-local settings (team shares memory and rules via .claude/settings.json)
 .claude/settings.local.json
 
