@@ -27,6 +27,7 @@ let selection =
     Allow { base = "add_"; overload = Some "Tensor" };
     Allow { base = "mul"; overload = Some "Tensor" };
     Allow { base = "reshape"; overload = None };
+    Allow { base = "flatten"; overload = Some "using_ints" };
     Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
   ]
 
