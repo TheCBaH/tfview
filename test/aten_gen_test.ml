@@ -15,21 +15,21 @@ let%expect_test "add.Tensor" =
   gen "add.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) -> Tensor";
   [%expect
     {|
-    void* atg_add_Tensor(void* self, void* other, double alpha) {
-      return new at::Tensor(at::add(*static_cast<at::Tensor*>(self), *static_cast<at::Tensor*>(other), c10::Scalar(alpha)));
+    atc_tensor atg_add_Tensor(atc_tensor self, atc_tensor other, double alpha) {
+      return atc_wrap(at::add(*reinterpret_cast<at::Tensor*>(self), *reinterpret_cast<at::Tensor*>(other), c10::Scalar(alpha)));
     }
     ---
-    let add_Tensor = foreign "atg_add_Tensor" (ptr void @-> ptr void @-> double @-> returning (ptr void)) |}]
+    let add_Tensor = foreign "atg_add_Tensor" (atc_tensor @-> atc_tensor @-> double @-> returning atc_tensor) |}]
 
 let%expect_test "mul.Tensor" =
   gen "mul.Tensor(Tensor self, Tensor other) -> Tensor";
   [%expect
     {|
-    void* atg_mul_Tensor(void* self, void* other) {
-      return new at::Tensor(at::mul(*static_cast<at::Tensor*>(self), *static_cast<at::Tensor*>(other)));
+    atc_tensor atg_mul_Tensor(atc_tensor self, atc_tensor other) {
+      return atc_wrap(at::mul(*reinterpret_cast<at::Tensor*>(self), *reinterpret_cast<at::Tensor*>(other)));
     }
     ---
-    let mul_Tensor = foreign "atg_mul_Tensor" (ptr void @-> ptr void @-> returning (ptr void)) |}]
+    let mul_Tensor = foreign "atg_mul_Tensor" (atc_tensor @-> atc_tensor @-> returning atc_tensor) |}]
 
 let%expect_test "reshape (IntList)" =
   gen "reshape(Tensor(a) self, SymInt[] shape) -> Tensor(a)";

@@ -26,7 +26,8 @@ size_t atc_dtype_elem_size(int8_t scalar_type);
    (StorageImpl/TensorImpl, no dispatcher / native kernels). atc_tensor is an
    opaque owning handle (a heap at::Tensor*); the caller must atc_free it.
    Tensors are contiguous; data is a plain float buffer. */
-typedef void* atc_tensor;
+struct atc_tensor_opaque;
+typedef struct atc_tensor_opaque* atc_tensor;
 
 /* New uninitialized CPU float tensor of the given contiguous shape. */
 atc_tensor atc_new_float(const int64_t* sizes, size_t ndim);

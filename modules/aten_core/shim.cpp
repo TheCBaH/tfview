@@ -26,7 +26,18 @@ at::Tensor make_cpu_float(const int64_t* sizes, size_t ndim) {
   return t;
 }
 
-inline at::Tensor* handle(atc_tensor t) { return static_cast<at::Tensor*>(t); }
+// Convert between the opaque C handle and the C++ type.
+inline at::Tensor* atc_to_ptr(atc_tensor t) {
+  return reinterpret_cast<at::Tensor*>(t);
+}
+inline atc_tensor atc_from_ptr(at::Tensor* t) {
+  return reinterpret_cast<atc_tensor>(t);
+}
+inline atc_tensor atc_wrap(at::Tensor t) {
+  return atc_from_ptr(new at::Tensor(std::move(t)));
+}
+
+inline at::Tensor* handle(atc_tensor t) { return atc_to_ptr(t); }
 
 // Raw buffer via storage (not data_ptr<T>, which would pull TensorMethods/item).
 inline float* buf(at::Tensor* t) {
@@ -46,7 +57,7 @@ size_t atc_dtype_elem_size(int8_t scalar_type) {
 }
 
 atc_tensor atc_new_float(const int64_t* sizes, size_t ndim) {
-  return new at::Tensor(make_cpu_float(sizes, ndim));
+  return atc_wrap(make_cpu_float(sizes, ndim));
 }
 
 void atc_free(atc_tensor t) { delete handle(t); }
@@ -65,14 +76,13 @@ void atc_fill_float(atc_tensor t, float v) {
 atc_tensor atc_add_float(atc_tensor a, atc_tensor b) {
   at::Tensor* ta = handle(a);
   at::Tensor* tb = handle(b);
-  auto* out = new at::Tensor(
-      make_cpu_float(ta->sizes().data(), ta->sizes().size()));
+  at::Tensor out = make_cpu_float(ta->sizes().data(), ta->sizes().size());
   float* pa = buf(ta);
   float* pb = buf(tb);
-  float* po = buf(out);
+  float* po = buf(&out);
   int64_t n = ta->numel();
   for (int64_t i = 0; i < n; ++i) po[i] = pa[i] + pb[i];
-  return out;
+  return atc_wrap(std::move(out));
 }
 
 }  // extern "C"

@@ -52,7 +52,7 @@ let generate (op : Func_ast.t) : result =
             let c_name, ocaml_name = names op in
             let c_source =
               Printf.sprintf
-                "void* %s(%s) {\n  return new at::Tensor(at::%s(%s));\n}" c_name
+                "atc_tensor %s(%s) {\n  return atc_wrap(at::%s(%s));\n}" c_name
                 (String.concat ", " c_params)
                 op.name.base
                 (String.concat ", " call_args)
@@ -60,7 +60,7 @@ let generate (op : Func_ast.t) : result =
             let ctypes_in = match ctypes_in with [] -> [ "void" ] | l -> l in
             let ctypes_line =
               Printf.sprintf
-                "let %s = foreign \"%s\" (%s @-> returning (ptr void))"
+                "let %s = foreign \"%s\" (%s @-> returning atc_tensor)"
                 ocaml_name c_name
                 (String.concat " @-> " ctypes_in)
             in
