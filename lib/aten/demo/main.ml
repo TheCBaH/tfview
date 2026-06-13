@@ -48,6 +48,22 @@ let () =
   done;
   let e' = O.add__Tensor e b 1.0 in
   show "e+=b" e' (T.as_float32 e' |> Option.get);
+  (* relu: max(0,x). g = [-2..3] -> [0;0;0;1;2;3]. *)
+  let g = make [| 2; 3 |] in
+  let bg = T.as_float32 g |> Option.get in
+  for i = 0 to Bigarray.Array1.dim bg - 1 do
+    bg.{i} <- float_of_int (i - 2)
+  done;
+  let rg = O.relu g in
+  show "relu g" rg (T.as_float32 rg |> Option.get);
+  (* relu_: in-place. h = [-3..2] -> [0;0;0;0;1;2]. *)
+  let h = make [| 2; 3 |] in
+  let bh = T.as_float32 h |> Option.get in
+  for i = 0 to Bigarray.Array1.dim bh - 1 do
+    bh.{i} <- float_of_int (i - 3)
+  done;
+  let rh = O.relu_ h in
+  show "relu_ h" rh (T.as_float32 rh |> Option.get);
   (* SymInt[]: reshape the 2x3 tensor 'a' to 3x2 (a view; shares storage). *)
   let i64 xs = CArray.of_list int64_t (List.map Int64.of_int xs) in
   let reshape_to t xs =
@@ -80,6 +96,10 @@ let () =
   F.free d;
   F.free e;
   F.free e';
+  F.free g;
+  F.free rg;
+  F.free h;
+  F.free rh;
   F.free r;
   F.free fl;
   F.free img;
