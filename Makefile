@@ -1,5 +1,3 @@
-BUILD_OPTIONS ?= --display short
-
 .PHONY: build test format runtest clean
 
 build:
