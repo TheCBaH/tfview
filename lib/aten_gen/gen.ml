@@ -24,7 +24,11 @@ let names (op : Func_ast.t) =
 (* positional + kwarg-only args (out= handled separately) *)
 let in_args (args : Func_ast.Arguments.t) = args.positional @ args.kwarg_only
 
-let generate (op : Func_ast.t) : result =
+(* [style] picks the C++ call form. [`Function] (the default) emits the free
+   function at::<op>(...); [`Method] emits <recv>-><op>(...) on the first
+   (Tensor) argument, for ops the schema marks `variants: method` only (e.g.
+   in-place ops like add_), which have no at:: free function. *)
+let generate ?(style = `Function) (op : Func_ast.t) : result =
   if op.arguments.out <> [] then Skipped "out= variant"
   else
     match C_type.map_returns op.returns with
@@ -57,10 +61,18 @@ let generate (op : Func_ast.t) : result =
                 (String.concat ", " c_params)
             in
             let c_decl = proto ^ ";" in
+            let call =
+              match (style, margs) with
+              | `Method, (recv, _) :: _ ->
+                  (* method on the first arg's tensor; rest are method args *)
+                  Printf.sprintf "atc_to_ptr(%s)->%s(%s)" recv.name op.name.base
+                    (String.concat ", " (List.tl call_args))
+              | _ ->
+                  Printf.sprintf "at::%s(%s)" op.name.base
+                    (String.concat ", " call_args)
+            in
             let c_source =
-              Printf.sprintf "%s {\n  return atc_wrap(at::%s(%s));\n}" proto
-                op.name.base
-                (String.concat ", " call_args)
+              Printf.sprintf "%s {\n  return atc_wrap(%s);\n}" proto call
             in
             let ctypes_in = match ctypes_in with [] -> [ "void" ] | l -> l in
             let ctypes_line =

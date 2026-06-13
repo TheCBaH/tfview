@@ -24,6 +24,7 @@ type selection =
 let selection =
   [
     Allow { base = "add"; overload = Some "Tensor" };
+    Allow { base = "add_"; overload = Some "Tensor" };
     Allow { base = "mul"; overload = Some "Tensor" };
     Allow { base = "reshape"; overload = None };
     Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
@@ -39,35 +40,40 @@ let die fmt =
 (* Parse a schema signature and run it through the generator, failing loudly if
    it cannot be parsed or the generator skips it (the selection is curated, so a
    skip is a configuration error, not an expected outcome). *)
-let generate_sig ~origin (sg : string) : Aten_gen.Gen.generated =
+let generate_sig ~origin ~style (sg : string) : Aten_gen.Gen.generated =
   match Func_schema.parse sg with
   | Error e -> die "%s: parse error: %s" origin e
   | Ok op -> (
-      match Aten_gen.Gen.generate op with
+      match Aten_gen.Gen.generate ~style op with
       | Skipped r -> die "%s: generator skipped (%s): %s" origin r sg
       | Generated g -> g)
 
-(* Find the native_functions.yaml entry matching [base]/[overload]. *)
-let find_entry (entries : Raw.t list) ~base ~overload : string =
+(* Find the native_functions.yaml entry matching [base]/[overload]. The call
+   style follows the schema's [variants]: ops marked method-only have no at::
+   free function, so they must be emitted as a Tensor method call. *)
+let find_entry (entries : Raw.t list) ~base ~overload : Raw.t =
   let matches (e : Raw.t) =
     match Func_schema.parse e.func with
     | Error _ -> false
     | Ok op -> op.name.base = base && op.name.overload = overload
   in
   match List.find_opt matches entries with
-  | Some e -> e.func
+  | Some e -> e
   | None ->
       let ov = match overload with None -> "" | Some s -> "." ^ s in
       die "no native_functions.yaml entry for op %s%s" base ov
+
+let style_of (e : Raw.t) =
+  if List.mem Raw.Variant.Function e.variants then `Function else `Method
 
 let resolve (entries : Raw.t list) : Aten_gen.Gen.generated list =
   List.map
     (fun sel ->
       match sel with
       | Allow { base; overload } ->
-          let sg = find_entry entries ~base ~overload in
-          generate_sig ~origin:"schema" sg
-      | Override sg -> generate_sig ~origin:"override" sg)
+          let e = find_entry entries ~base ~overload in
+          generate_sig ~origin:"schema" ~style:(style_of e) e.func
+      | Override sg -> generate_sig ~origin:"override" ~style:`Function sg)
     selection
 
 let () =
