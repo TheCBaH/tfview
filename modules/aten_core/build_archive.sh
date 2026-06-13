@@ -24,11 +24,14 @@ INC=(-I"$PT" -I"$PT/aten/src" -Igen -Iinc
      -I"$PT/third_party/fmt/include" -I"$PT/third_party/cpuinfo/include")
 FLAGS=(-std=c++17 -Os -fPIC -DFMT_HEADER_ONLY=1)
 
-# Source list: c10 core+util, ATen/core (excluding *test*), generated core srcs,
-# plus our thin extern "C" shim (shim.cpp) so its atc_* symbols ship in the
-# archive for ctypes to link against.
+# Source list: the complete c10 core (core incl. core/impl, util, mobile —
+# recursive, since c10/core/impl holds PyObjectSlot/COW/SizesAndStrides/TLS that
+# tensor construction needs), ATen/core, the generated core srcs, plus our thin
+# extern "C" shim. This is the smallest subset that can construct CPU tensors
+# and run trivial ops via direct storage access (no dispatcher / native kernels
+# / cpuinfo). Tests excluded.
 mapfile -t SRCS < <(
-  find "$PT/c10/core" "$PT/c10/util" -maxdepth 1 -name '*.cpp' ! -name '*test*'
+  find "$PT/c10/core" "$PT/c10/util" "$PT/c10/mobile" -name '*.cpp' ! -name '*test*'
   find "$PT/aten/src/ATen/core" -name '*.cpp' ! -name '*test*'
   echo gen/ATen/core/ATenOpList.cpp
   echo gen/ATen/core/TensorMethods.cpp

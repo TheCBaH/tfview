@@ -15,12 +15,23 @@ IValue, type system, and Tensor metadata. It is self-contained and small:
 
 | Layer | Files | What |
 |---|---|---|
-| `c10/core` + `c10/util` | 75 `.cpp` | foundation: Device, ScalarType, Storage, Allocator |
+| `c10/core` (incl. `core/impl`) + `c10/util` + `c10/mobile` | 89 `.cpp` | foundation: Device, ScalarType, Storage, Allocator, TensorImpl, PyObjectSlot/COW/SizesAndStrides, caching allocators |
 | `aten/src/ATen/core` | 45 `.cpp` | dispatcher, `ivalue`, `function_schema`, `Tensor`, boxing |
 | generated core sources | 2 `.cpp` | `core/ATenOpList.cpp`, `core/TensorMethods.cpp` |
+| shim | 1 `.cpp` | the extern "C" binding surface (see below) |
 
-122 translation units total. Verified: all compile to `.o`, zero failures
-(g++ 14.2, `-std=c++17`, CPU/static). `-Os` → ~7.9 MB archive.
+137 translation units total (the c10 globs are recursive — an earlier version
+used `-maxdepth 1` and silently dropped `c10/core/impl` + `c10/mobile`, which
+broke real tensor construction). Verified: all compile to `.o`, zero failures
+(g++ 14.2, `-std=c++17`, CPU/static). `-Os` → ~8 MB archive.
+
+This subset is the smallest that can **construct CPU tensors and run trivial
+ops** with no dispatcher, no native kernels, no `cpuinfo`, no `at::empty`:
+build a tensor straight from c10 (`StorageImpl` + `TensorImpl` +
+`set_sizes_contiguous`) and access its buffer via `storage().mutable_data()`.
+Note: using `data_ptr<T>()` instead would pull `TensorMethods.cpp`'s
+`Tensor::item()` → `at::_ops::item::call` → the whole `Operators_*.cpp` +
+`record_function` layer, so the shim deliberately uses raw storage access.
 
 ## The dependency closure (empirically determined)
 
@@ -92,11 +103,24 @@ Mechanics (no runtime `.so` loading — static linking + generated stubs):
 - Needs `(using ctypes 0.3)` in dune-project, opam `ctypes` + `ctypes-foreign`, and
   apt `libffi-dev` + `pkg-config` (wired into devcontainer.json + Dockerfile).
 
-Done — **Step 0 (plumbing)**: [demo/main.ml](../modules/aten_core/demo/main.ml) calls
-two trivial c10 shims and prints `default dtype = 6, elem size = 4 bytes`
-(`ScalarType::Float`, 4 bytes); verified by [demo/demo.t](../modules/aten_core/demo/demo.t).
-No Tensor yet.
+The library + demo live in [lib/aten/](../lib/aten/) (binding) and
+[lib/aten/demo/](../lib/aten/demo/); `modules/aten_core/` builds only the C++
+artifacts. lib/aten pulls `libaten_core.a` / `dllaten_core.so` / `shim.h` from
+modules/aten_core via plain cross-dir copy rules (these are dune targets, not the
+excluded pytorch submodule).
 
-Next: Step 1 bind `c10::Scalar`/`ScalarType`; Step 2 grow the C++ build from "core" to
-the full CPU `aten_cpu` (native kernels + `RegisterCPU` codegen) so factories/kernels
-link; Step 3 Tensor-handle lifecycle; Step 4 `at::add`.
+Done — **Step 0 (plumbing)** + **Step 2 (minimal tensor runtime)**: the shim now
+exposes `atc_new_float` / `atc_free` / `atc_numel` / `atc_data_float` /
+`atc_fill_float` (scalar) / `atc_add_float` (tensor). [lib/aten/demo/main.ml](../lib/aten/demo/main.ml)
+creates two `2x3` CPU tensors, fills one with a scalar, adds them, and prints
+`a+b = [10; 11; 12; 13; 14; 15]` — verified by [demo.t](../lib/aten/demo/demo.t).
+The op is a direct buffer loop (no dispatcher) — intentionally, to stay on the
+minimal "core" subset.
+
+Decided plan (user): keep the hand-written shim; then build a **parser** (extend
+[lib/aten_schema](../lib/aten_schema/)) and an incremental **generator** gated by a
+controlled allow-list of funcs/types (rest handled manually) that emits extern "C"
+shims + ctypes from the schema — ocaml-torch's hand-core + generated-ops split.
+Dispatched `at::add` (which needs growing the build to CPU `aten_cpu`: native
+kernels + `RegisterCPU` codegen + `cpuinfo`) is deferred until the generator path
+needs it.

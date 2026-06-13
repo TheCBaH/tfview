@@ -22,6 +22,30 @@ int8_t atc_default_dtype(void);
 /* Size in bytes of one element of the given c10::ScalarType. */
 size_t atc_dtype_elem_size(int8_t scalar_type);
 
+/* Step 2: minimal CPU float32 tensor runtime built directly on c10
+   (StorageImpl/TensorImpl, no dispatcher / native kernels). atc_tensor is an
+   opaque owning handle (a heap at::Tensor*); the caller must atc_free it.
+   Tensors are contiguous; data is a plain float buffer. */
+typedef void* atc_tensor;
+
+/* New uninitialized CPU float tensor of the given contiguous shape. */
+atc_tensor atc_new_float(const int64_t* sizes, size_t ndim);
+
+/* Release a handle returned by atc_new_float / atc_add_float. */
+void atc_free(atc_tensor t);
+
+/* Number of elements. */
+int64_t atc_numel(atc_tensor t);
+
+/* Pointer to the contiguous element buffer (read/write from the caller). */
+float* atc_data_float(atc_tensor t);
+
+/* Scalar op: set every element to v. */
+void atc_fill_float(atc_tensor t, float v);
+
+/* Tensor op: elementwise a + b into a fresh tensor (shapes must match). */
+atc_tensor atc_add_float(atc_tensor a, atc_tensor b);
+
 #ifdef __cplusplus
 }
 #endif
