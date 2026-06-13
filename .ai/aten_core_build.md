@@ -123,4 +123,5 @@ controlled allow-list of funcs/types (rest handled manually) that emits extern "
 shims + ctypes from the schema — ocaml-torch's hand-core + generated-ops split.
 Dispatched `at::add` (which needs growing the build to CPU `aten_cpu`: native
 kernels + `RegisterCPU` codegen + `cpuinfo`) is deferred until the generator path
-needs it.
+needs it. For calling *real* ATen ops dispatch-free and SIMD-free when that time
+comes, see the proven recipe in [aten_static_dispatch.md](aten_static_dispatch.md).
