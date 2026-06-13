@@ -1,5 +1,6 @@
 #include "shim.h"
 
+#include <ATen/Functions.h>
 #include <c10/core/CPUAllocator.h>
 #include <c10/core/DefaultDtype.h>
 #include <c10/core/ScalarType.h>
@@ -51,30 +52,12 @@ void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype) {
   return a->unsafeGetTensorImpl()->storage().mutable_data();
 }
 
-atc_tensor atc_add_float(atc_tensor a, atc_tensor b) {
-  auto* ta = atc_to_ptr(a);
-  auto* tb = atc_to_ptr(b);
-  auto out = make_cpu_tensor(ta->sizes().data(), ta->sizes().size(),
-                             ta->scalar_type());
-  auto* pa = static_cast<float*>(ta->unsafeGetTensorImpl()->storage().mutable_data());
-  auto* pb = static_cast<float*>(tb->unsafeGetTensorImpl()->storage().mutable_data());
-  auto* po = static_cast<float*>(out.unsafeGetTensorImpl()->storage().mutable_data());
-  int64_t n = ta->numel();
-  for (int64_t i = 0; i < n; ++i) po[i] = pa[i] + pb[i];
-  return atc_wrap(std::move(out));
+atc_tensor atc_add(atc_tensor a, atc_tensor b) {
+  return atc_wrap(at::add(*atc_to_ptr(a), *atc_to_ptr(b)));
 }
 
 atc_tensor atc_mul(atc_tensor a, atc_tensor b) {
-  auto* ta = atc_to_ptr(a);
-  auto* tb = atc_to_ptr(b);
-  auto out = make_cpu_tensor(ta->sizes().data(), ta->sizes().size(),
-                             ta->scalar_type());
-  auto* pa = static_cast<float*>(ta->unsafeGetTensorImpl()->storage().mutable_data());
-  auto* pb = static_cast<float*>(tb->unsafeGetTensorImpl()->storage().mutable_data());
-  auto* po = static_cast<float*>(out.unsafeGetTensorImpl()->storage().mutable_data());
-  int64_t n = ta->numel();
-  for (int64_t i = 0; i < n; ++i) po[i] = pa[i] * pb[i];
-  return atc_wrap(std::move(out));
+  return atc_wrap(at::mul(*atc_to_ptr(a), *atc_to_ptr(b)));
 }
 
 }  // extern "C"

@@ -37,6 +37,7 @@
   build_archive.sh
   shim.cpp
   shim.h
+  stubs.cpp
   (glob_files_rec inc/*)
   (glob_files_rec gen/*))
  (action

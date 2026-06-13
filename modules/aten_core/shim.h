@@ -40,7 +40,7 @@ size_t atc_dtype_elem_size(int8_t scalar_type);
 /* New uninitialized contiguous CPU tensor of the given shape and dtype. */
 atc_tensor atc_new(const int64_t* sizes, size_t ndim, atc_scalar_type dtype);
 
-/* Release a handle returned by atc_new / atc_add_float / atc_mul. */
+/* Release a handle returned by atc_new / atc_add / atc_mul. */
 void atc_free(atc_tensor t);
 
 /* Number of elements. */
@@ -50,10 +50,11 @@ int64_t atc_numel(atc_tensor t);
    Returns NULL on mismatch; the caller casts to the appropriate element type. */
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
 
-/* Elementwise a + b into a fresh tensor (shapes must match). */
-atc_tensor atc_add_float(atc_tensor a, atc_tensor b);
+/* Elementwise a + b via the real ATen kernel (at::add); broadcasting and type
+   promotion apply. Returns a fresh tensor. */
+atc_tensor atc_add(atc_tensor a, atc_tensor b);
 
-/* Elementwise a * b into a fresh tensor (shapes must match). */
+/* Elementwise a * b via the real ATen kernel (at::mul). Returns a fresh tensor. */
 atc_tensor atc_mul(atc_tensor a, atc_tensor b);
 
 #ifdef __cplusplus

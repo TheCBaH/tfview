@@ -24,7 +24,19 @@
   (build_flags_resolver
    (vendored
     (c_flags :standard)
-    (c_library_flags :standard -lstdc++ -lpthread)))
+    ; Link the static-dispatch archive with lld + --gc-sections: the generated
+    ; glue is built with -ffunction-sections so GC trims the ~2600 unreached
+    ; at::cpu:: op wrappers down to the add/mul closure. lld is essential — GNU
+    ; ld takes minutes (often hangs) doing this GC over the giant objects.
+    ; --no-export-dynamic undoes ocamlopt's default -E: otherwise every global
+    ; symbol is a GC root and --gc-sections keeps the whole archive.
+    (c_library_flags
+     :standard
+     -fuse-ld=lld
+     -Wl,--gc-sections
+     -Wl,--no-export-dynamic
+     -lstdc++
+     -lpthread)))
   (headers
    (preamble "#include \"shim.h\""))
   (type_description

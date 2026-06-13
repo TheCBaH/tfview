@@ -21,7 +21,7 @@ let () =
     ba.{i} <- float_of_int (i + 1)
   done;
   Bigarray.Array1.fill bb 3.0;
-  let c = F.add_float a b in
+  let c = F.add a b in
   let d = F.mul a b in
   let bc = T.as_float32 c |> Option.get in
   let bd = T.as_float32 d |> Option.get in

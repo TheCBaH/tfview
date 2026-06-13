@@ -26,8 +26,8 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let data_ptr =
     foreign "atc_data_ptr" (atc_tensor @-> int8_t @-> returning (ptr void))
 
-  let add_float =
-    foreign "atc_add_float" (atc_tensor @-> atc_tensor @-> returning atc_tensor)
+  let add =
+    foreign "atc_add" (atc_tensor @-> atc_tensor @-> returning atc_tensor)
 
   let mul =
     foreign "atc_mul" (atc_tensor @-> atc_tensor @-> returning atc_tensor)
