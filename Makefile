@@ -1,7 +1,9 @@
+BUILD_OPTIONS ?= --display short
+
 .PHONY: build test format runtest clean
 
 build:
-	opam exec -- dune build --display short
+	opam exec -- dune build $(BUILD_OPTIONS)
 
 format:
 	opam exec -- dune fmt

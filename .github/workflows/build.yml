@@ -21,7 +21,7 @@ jobs:
         echo 'EXEC=${{ steps.devcontainer.outputs.exec }}' >> $GITHUB_ENV
     - name: build
       run: |
-        ${{ env.EXEC }} make build
+        ${{ env.EXEC }} make build BUILD_OPTIONS=--verbose
     - name: test
       run: |
         ${{ env.EXEC }} make runtest
