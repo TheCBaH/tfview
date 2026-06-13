@@ -1,7 +1,7 @@
-.PHONY: build test
+.PHONY: build test format runtest clean
 
 build:
-	opam exec -- dune build
+	opam exec -- dune build --display short
 
 format:
 	opam exec -- dune fmt
@@ -11,3 +11,7 @@ test:
 
 runtest:
 	opam exec -- dune runtest
+
+clean:
+	opam exec -- dune clean
+	rm -rf modules/aten_core/gen modules/aten_core/inc
