@@ -86,6 +86,16 @@ int atc_item_int64(atc_tensor t, int64_t* out);
    until the next shim call on the same thread. */
 const char* atc_last_error(void);
 
+/* Human-readable rendering via ATen's tensor printer. Valid until the next shim
+   call on this thread; NULL (with atc_last_error set) on error. */
+const char* atc_to_string(atc_tensor t);
+
+/* Elementwise closeness / exact equality (ATen at::allclose / at::equal).
+   Return 1 (true) or 0 (false), or -1 with atc_last_error set on error. */
+int atc_allclose(atc_tensor a, atc_tensor b, double rtol, double atol,
+                 int equal_nan);
+int atc_equal(atc_tensor a, atc_tensor b);
+
 /* Number of live tensor handles: atc_wrap allocations not yet atc_free'd.
    atc_wrap is the single allocation point (atc_new and every op wrapper go
    through it), so this is an exact live count — used by the OCaml RAII layer's

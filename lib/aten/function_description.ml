@@ -53,4 +53,11 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let live_count = foreign "atc_live_count" (void @-> returning int64_t)
   let last_error = foreign "atc_last_error" (void @-> returning string_opt)
+  let to_string = foreign "atc_to_string" (atc_tensor @-> returning string_opt)
+
+  let allclose =
+    foreign "atc_allclose"
+      (atc_tensor @-> atc_tensor @-> double @-> double @-> int @-> returning int)
+
+  let equal = foreign "atc_equal" (atc_tensor @-> atc_tensor @-> returning int)
 end

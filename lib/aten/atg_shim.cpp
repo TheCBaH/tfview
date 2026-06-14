@@ -1,7 +1,10 @@
 #include "atg_shim.h"
 
 #include <algorithm>
+#include <sstream>
 #include <string>
+
+#include <ATen/core/Formatting.h>
 
 #include <ATen/Functions.h>
 #include <c10/core/CPUAllocator.h>
@@ -33,8 +36,9 @@ at::Tensor make_cpu_tensor(const int64_t* sizes, size_t ndim,
 namespace atc_detail {
 std::atomic<long> live{0};
 
-/* Thread-local so each OCaml-calling thread reads its own last error. */
+/* Thread-local so each OCaml-calling thread reads its own last error / string. */
 thread_local std::string last_error;
+thread_local std::string last_string;
 void set_error(const char* msg) { last_error = msg ? msg : "unknown error"; }
 }  // namespace atc_detail
 
@@ -58,6 +62,31 @@ atc_tensor atc_new(const int64_t* sizes, size_t ndim, atc_scalar_type dtype) {
 const char* atc_last_error(void) {
   return atc_detail::last_error.empty() ? nullptr
                                         : atc_detail::last_error.c_str();
+}
+
+const char* atc_to_string(atc_tensor t) {
+  ATC_TRY(nullptr, {
+    std::ostringstream oss;
+    oss << *atc_to_ptr(t);
+    atc_detail::last_string = oss.str();
+    return atc_detail::last_string.c_str();
+  })
+}
+
+int atc_allclose(atc_tensor a, atc_tensor b, double rtol, double atol,
+                 int equal_nan) {
+  ATC_TRY(-1, {
+    return at::allclose(*atc_to_ptr(a), *atc_to_ptr(b), rtol, atol,
+                        (bool)equal_nan)
+               ? 1
+               : 0;
+  })
+}
+
+int atc_equal(atc_tensor a, atc_tensor b) {
+  ATC_TRY(-1, {
+    return at::equal(*atc_to_ptr(a), *atc_to_ptr(b)) ? 1 : 0;
+  })
 }
 
 void atc_free(atc_tensor t) {

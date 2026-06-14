@@ -112,3 +112,24 @@ let pp_float32 fmt (ba : float32_array) =
        ~pp_sep:(fun fmt () -> Format.pp_print_string fmt "; ")
        (fun fmt v -> Format.fprintf fmt "%g" v))
     seq
+
+(* Canonical rendering via ATen's tensor printer (multi-line, with a dtype/shape
+   footer). [pp] is the Format pretty-printer over it. *)
+let to_string t =
+  match F.to_string t with
+  | Some s -> s
+  | None -> raise (Error (Option.value (F.last_error ()) ~default:"to_string"))
+
+let pp fmt t = Format.pp_print_string fmt (to_string t)
+
+(* [r] is the shim's bool result: 1/0, or -1 (error). *)
+let to_bool name r =
+  if r < 0 then raise (Error (Option.value (F.last_error ()) ~default:name))
+  else r <> 0
+
+(* Elementwise closeness (ATen at::allclose): |a-b| <= atol + rtol*|b|. *)
+let allclose ?(rtol = 1e-5) ?(atol = 1e-8) ?(equal_nan = false) a b =
+  to_bool "allclose" (F.allclose a b rtol atol (if equal_nan then 1 else 0))
+
+(* Exact elementwise equality (ATen at::equal); false on shape/dtype mismatch. *)
+let equal a b = to_bool "equal" (F.equal a b)

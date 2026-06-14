@@ -184,3 +184,25 @@ let%expect_test "to.dtype casts float -> int64 (truncating)" =
     (Stype.to_int (T.scalar_type i))
     v.{0} v.{1} v.{2};
   [%expect "dtype=4 vals=1,2,3"]
+
+(* Phase 4: pretty-printing and comparison helpers. *)
+
+let%expect_test "pp renders via ATen's printer" =
+  let t = float_tensor [ 2; 3 ] [ 1.; 2.; 3.; 4.; 5.; 6. ] in
+  Format.printf "%a@." T.pp t;
+  [%expect {|
+     1  2  3
+     4  5  6
+    [ CPUFloatType{2,3} ] |}]
+
+let%expect_test "allclose / equal" =
+  let a = float_tensor [ 3 ] [ 1.; 2.; 3. ] in
+  let b = float_tensor [ 3 ] [ 1.; 2.; 3. ] in
+  let c = float_tensor [ 3 ] [ 1.; 2.; 3.5 ] in
+  Printf.printf "equal a b=%b  equal a c=%b\n" (T.equal a b) (T.equal a c);
+  Printf.printf "allclose a b=%b  allclose a c=%b  allclose ~atol:1.0 a c=%b\n"
+    (T.allclose a b) (T.allclose a c) (T.allclose ~atol:1.0 a c);
+  [%expect
+    {|
+    equal a b=true  equal a c=false
+    allclose a b=true  allclose a c=false  allclose ~atol:1.0 a c=true |}]
