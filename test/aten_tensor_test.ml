@@ -148,3 +148,39 @@ let%expect_test "item_float / item_int; numel<>1 raises" =
     item_float=42.5
     item_int=7
     raised on numel<>1 |}]
+
+(* Phase 3: kernel-backed conversions. *)
+
+let float_tensor shape vals =
+  let t = T.create shape in
+  let v = T.data Dtype.float32 t |> Option.get in
+  List.iteri (fun i x -> v.{i} <- x) vals;
+  t
+
+let floats t =
+  let v = T.data Dtype.float32 t |> Option.get in
+  String.concat ","
+    (List.init (Bigarray.Array1.dim v) (fun i -> Printf.sprintf "%g" v.{i}))
+
+let%expect_test "clone makes an independent copy" =
+  let a = float_tensor [ 3 ] [ 1.; 2.; 3. ] in
+  let b = T.manage (O.clone a) in
+  (T.data Dtype.float32 a |> Option.get).{0} <- 99.;
+  Printf.printf "a=%s clone=%s\n" (floats a) (floats b);
+  [%expect "a=99,2,3 clone=1,2,3"]
+
+let%expect_test "contiguous / cpu preserve values" =
+  let a = float_tensor [ 2; 2 ] [ 1.; 2.; 3.; 4. ] in
+  Printf.printf "contiguous=%s cpu=%s\n"
+    (floats (T.manage (O.contiguous a)))
+    (floats (T.manage (O.cpu a)));
+  [%expect "contiguous=1,2,3,4 cpu=1,2,3,4"]
+
+let%expect_test "to.dtype casts float -> int64 (truncating)" =
+  let a = float_tensor [ 3 ] [ 1.5; 2.7; 3.9 ] in
+  let i = T.manage (O.to_dtype a (Stype.to_int Stype.Long) false false) in
+  let v = T.data Dtype.int64 i |> Option.get in
+  Printf.printf "dtype=%d vals=%Ld,%Ld,%Ld\n"
+    (Stype.to_int (T.scalar_type i))
+    v.{0} v.{1} v.{2};
+  [%expect "dtype=4 vals=1,2,3"]
