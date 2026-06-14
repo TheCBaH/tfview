@@ -44,7 +44,26 @@ at::Tensor& quantized_copy_from_float_(at::Tensor& self, const at::Tensor&) { MI
 bool use_mkldnn_matmul(const at::Tensor&, const at::Tensor&, const at::Tensor&) { return false; }
 at::Tensor mkldnn_matmul(const at::Tensor&, const at::Tensor&, const at::Tensor&, float, float) { MINSTUB("mkldnn_matmul"); }
 
+// Convolution.cpp's backend switch references every conv variant straight-line;
+// resnet18's 2D, non-dilated, non-transposed convs only take slow_conv2d
+// (ConvolutionMM2d.cpp), so the 3D / dilated / transpose leaves are stubbed.
+at::Tensor slow_conv3d(const at::Tensor&, const at::Tensor&, at::IntArrayRef, const std::optional<at::Tensor>&, at::IntArrayRef, at::IntArrayRef) { MINSTUB("slow_conv3d"); }
+at::Tensor slow_conv_dilated2d_cpu(const at::Tensor&, const at::Tensor&, at::IntArrayRef, const std::optional<at::Tensor>&, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef) { MINSTUB("slow_conv_dilated2d_cpu"); }
+at::Tensor slow_conv_dilated3d_cpu(const at::Tensor&, const at::Tensor&, at::IntArrayRef, const std::optional<at::Tensor>&, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef) { MINSTUB("slow_conv_dilated3d_cpu"); }
+at::Tensor slow_conv_transpose3d_cpu(const at::Tensor&, const at::Tensor&, at::IntArrayRef, const std::optional<at::Tensor>&, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef) { MINSTUB("slow_conv_transpose3d_cpu"); }
+void structured_slow_conv_transpose2d_structured_cpu::impl(const at::Tensor&, const at::Tensor&, at::IntArrayRef, at::OptionalTensorRef, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef, const at::Tensor&) { MINSTUB("slow_conv_transpose2d.impl"); }
+
+// xnnpack mobile conv fast path (Convolution.cpp); never built/taken here.
+namespace xnnpack {
+at::Tensor convolution2d(const at::Tensor&, const at::Tensor&, const at::Tensor&, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef, int64_t) { MINSTUB("xnnpack::convolution2d"); }
+}  // namespace xnnpack
+
 }  // namespace native
+
+namespace meta {
+// structured slow_conv_transpose2d meta (paired with the native impl stub).
+void structured_slow_conv_transpose2d::meta(const at::Tensor&, const at::Tensor&, at::IntArrayRef, at::OptionalTensorRef, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef, at::IntArrayRef) { MINSTUB("slow_conv_transpose2d.meta"); }
+}  // namespace meta
 
 namespace vulkan {
 at::Tensor& vulkan_copy_(at::Tensor& self, const at::Tensor&) { MINSTUB("vulkan_copy_"); return self; }

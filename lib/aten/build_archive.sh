@@ -123,6 +123,11 @@ mapfile -t SRCS_GLUE < <(
   # batch_norm: composite -> _batch_norm_impl_index -> native_batch_norm
   # (Normalization.cpp); CPU kernel is cpu/batch_norm_kernel.cpp (CAP).
   echo "$PT/aten/src/ATen/native/Normalization.cpp"
+  # conv2d -> convolution -> _convolution -> slow_conv2d (ConvolutionMM2d.cpp),
+  # which im2col's (Unfold2d.cpp) then gemm's. cpu/Unfold2d kernel is in CAP.
+  echo "$PT/aten/src/ATen/native/Convolution.cpp"
+  echo "$PT/aten/src/ATen/native/ConvolutionMM2d.cpp"
+  echo "$PT/aten/src/ATen/native/Unfold2d.cpp"
   echo "$PT/aten/src/ATen/native/ReduceOps.cpp"
   echo "$PT/aten/src/ATen/native/ReduceAllOps.cpp"
   # TensorIteratorBase::parallel_reduce (separate from TensorIterator.cpp).
@@ -165,6 +170,12 @@ mapfile -t SRCS_CAP < <(
   echo "$PT/aten/src/ATen/native/cpu/ReducedPrecisionFloatGemvFastPathKernel.cpp"
   # batch_norm_cpu_stub (the vectorized batch-norm kernel).
   echo "$PT/aten/src/ATen/native/cpu/batch_norm_kernel.cpp"
+  # im2col/col2im kernel (unfolded_copy/unfolded_acc) for slow_conv2d.
+  echo "$PT/aten/src/ATen/native/cpu/Unfold2d.cpp"
+  # DispatchStub ::DEFAULT members Convolution.cpp references: cat_serial_stub
+  # (grouped-conv at::cat) and the depthwise-3x3-winograd stub.
+  echo "$PT/aten/src/ATen/native/cpu/CatKernel.cpp"
+  echo "$PT/aten/src/ATen/native/cpu/DepthwiseConvKernel.cpp"
   # REGISTER_DISPATCH(avg_pool2d_kernel, ...) — the vectorized pooling kernel.
   echo "$PT/aten/src/ATen/native/cpu/AvgPoolKernel.cpp"
 )

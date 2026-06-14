@@ -138,6 +138,22 @@ let () =
   Format.printf "batch_norm %a -> %a = %a\n" pp_shape (T.shape bn_x) pp_shape
     (T.shape bn_y) T.pp_float32
     (T.as_float32 bn_y |> Option.get);
+  (* conv2d: x[1x1x3x3]=1..9, W[1x1x2x2]=[[1,0],[0,1]] (diagonal), b=[0],
+     stride 1, pad 0, dil 1, groups 1. Each window -> x00+x11 -> [6;8;12;14]. *)
+  let cv_x = make [| 1; 1; 3; 3 |] in
+  set cv_x [ 1.; 2.; 3.; 4.; 5.; 6.; 7.; 8.; 9. ];
+  let cv_w = make [| 1; 1; 2; 2 |] in
+  set cv_w [ 1.; 0.; 0.; 1. ];
+  let cv_b = make [| 1 |] in
+  set cv_b [ 0. ];
+  let one2 = i64 [ 1; 1 ] and zero2 = i64 [ 0; 0 ] in
+  let cv_y =
+    O.conv2d cv_x cv_w cv_b (CArray.start one2) 2 (CArray.start zero2) 2
+      (CArray.start one2) 2 1L
+  in
+  Format.printf "conv2d %a -> %a = %a\n" pp_shape (T.shape cv_x) pp_shape
+    (T.shape cv_y) T.pp_float32
+    (T.as_float32 cv_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -163,4 +179,8 @@ let () =
   F.free bn_b;
   F.free bn_m;
   F.free bn_v;
-  F.free bn_y
+  F.free bn_y;
+  F.free cv_x;
+  F.free cv_w;
+  F.free cv_b;
+  F.free cv_y
