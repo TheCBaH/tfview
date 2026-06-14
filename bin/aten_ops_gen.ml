@@ -29,6 +29,7 @@ let selection =
     Allow { base = "relu"; overload = None };
     Allow { base = "relu_"; overload = None };
     Allow { base = "sigmoid"; overload = None };
+    Allow { base = "hardtanh_"; overload = None };
     Allow { base = "reshape"; overload = None };
     Allow { base = "flatten"; overload = Some "using_ints" };
     Allow { base = "max_pool2d"; overload = None };

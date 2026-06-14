@@ -166,6 +166,12 @@ let () =
   set sg [ 0.; 0.; 0. ];
   let sg_y = O.sigmoid sg in
   show "sigmoid sg" sg_y (T.as_float32 sg_y |> Option.get);
+  (* hardtanh_ in-place clamps to [min,max]; relu6 = hardtanh_(0,6).
+     [-1;3;8] -> [0;3;6]. *)
+  let ht = make [| 3 |] in
+  set ht [ -1.; 3.; 8. ];
+  let ht_y = O.hardtanh_ ht 0.0 6.0 in
+  show "hardtanh_ ht" ht_y (T.as_float32 ht_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -200,4 +206,6 @@ let () =
   F.free dp_y;
   F.free dp_z;
   F.free sg;
-  F.free sg_y
+  F.free sg_y;
+  F.free ht;
+  F.free ht_y

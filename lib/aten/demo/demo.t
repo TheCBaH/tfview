@@ -11,7 +11,7 @@ compute kernel (1x1x4x4 of 1..16, 2x2 kernel -> the four block means
 x @ W^T + b via the addmm/gemm path; batch_norm (inference) applies the
 per-channel affine (x-mean)/sqrt(var+eps)*w+b; conv2d runs a 2x2 diagonal
 kernel over a 3x3 input (slow_conv2d im2col+gemm path); dropout/dropout_ at
-inference (train=false) are the identity; sigmoid(0) = 0.5.
+inference (train=false) are the identity; sigmoid(0) = 0.5; hardtanh_ clamps to [min,max] (relu6 = hardtanh_(0,6)).
 
   $ ./main.exe
   default dtype = 6, elem size = 4 bytes
@@ -33,3 +33,4 @@ inference (train=false) are the identity; sigmoid(0) = 0.5.
   dropout dp [2x3] = [1; 2; 3; 4; 5; 6]
   dropout_ dp [2x3] = [1; 2; 3; 4; 5; 6]
   sigmoid sg [3] = [0.5; 0.5; 0.5]
+  hardtanh_ ht [3] = [0; 3; 6]
