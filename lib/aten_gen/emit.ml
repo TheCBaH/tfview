@@ -1,8 +1,8 @@
 (* File assembly: turn an ordered list of per-op [Gen.generated] records into
    the three complete artifacts that lib/aten compiles and binds against:
 
-     ops.h                    extern "C" declarations  (the C ABI surface)
-     ops.cpp                  extern "C" definitions   (each calls at::<op>)
+     atg_ops.h                extern "C" declarations  (the C ABI surface)
+     atg_ops.cpp              extern "C" definitions   (each calls at::<op>)
      operation_description.ml the ctypes Functions functor (one [foreign] line)
 
    These mirror the previously hand-written files; the per-op bodies come
@@ -29,10 +29,10 @@ let header ops =
   Printf.sprintf
     {|%s
 
-#ifndef ATEN_CORE_OPS_H_
-#define ATEN_CORE_OPS_H_
+#ifndef ATG_OPS_H_
+#define ATG_OPS_H_
 
-#include "shim.h" /* atc_tensor + C scalar/handle types */
+#include "atg_shim.h" /* atc_tensor + C scalar/handle types */
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
 }
 #endif
 
-#endif /* ATEN_CORE_OPS_H_ */
+#endif /* ATG_OPS_H_ */
 |}
     banner body
 
@@ -58,7 +58,7 @@ let source ops =
   Printf.sprintf
     {|%s
 
-#include "ops.h"
+#include "atg_ops.h"
 
 #include <ATen/Functions.h>
 

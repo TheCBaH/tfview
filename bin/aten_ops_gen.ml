@@ -1,9 +1,9 @@
 (* Driver for the ATen operation-binding generator. Emits ONE of the three
-   build artifacts (ops.h, ops.cpp, operation_description.ml) to stdout from a
+   build artifacts (atg_ops.h, atg_ops.cpp, operation_description.ml) to stdout from a
    curated selection of ops, so lib/aten/dune can produce each with a
    [with-stdout-to] rule.
 
-   Usage: aten_ops_gen <native_functions.yaml> <ops.h|ops.cpp|operation_description.ml>
+   Usage: aten_ops_gen <native_functions.yaml> <atg_ops.h|atg_ops.cpp|operation_description.ml>
 
    The op set is curated on purpose: the static-dispatch + --gc-sections build
    trims unreached at:: kernels, so binding every supported op would force-link
@@ -104,7 +104,7 @@ let () =
   if Array.length Sys.argv <> 3 then
     die
       "Usage: aten_ops_gen <native_functions.yaml> \
-       <ops.h|ops.cpp|operation_description.ml>";
+       <atg_ops.h|atg_ops.cpp|operation_description.ml>";
   let yaml = In_channel.with_open_bin Sys.argv.(1) In_channel.input_all in
   let entries =
     match Raw.of_yaml_string yaml with
@@ -114,8 +114,8 @@ let () =
   let ops = resolve entries in
   let out =
     match Sys.argv.(2) with
-    | "ops.h" -> Aten_gen.Emit.header ops
-    | "ops.cpp" -> Aten_gen.Emit.source ops
+    | "atg_ops.h" -> Aten_gen.Emit.header ops
+    | "atg_ops.cpp" -> Aten_gen.Emit.source ops
     | "operation_description.ml" -> Aten_gen.Emit.ocaml ops
     | other -> die "unknown output target: %s" other
   in

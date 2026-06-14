@@ -10,7 +10,7 @@
 #   3. native runtime the kernels need: TensorIterator, Parallel*, factories
 #      (empty*/empty_like), shape (as_strided/select), conversions, BinaryOps
 #      (+ BinaryOpsKernel/FillKernel = mul_stub/fill_stub) — the bounded closure
-#   4. stubs.cpp — throwing leaves for the cold-path ops TensorIterator/structured
+#   4. atg_stubs.cpp — throwing leaves for the cold-path ops TensorIterator/structured
 #      kernels reference straight-line but never run for dense float (Option A)
 #   5. cpuinfo (built here via cmake) — ParallelNative needs it; bundled in
 #
@@ -138,9 +138,9 @@ mapfile -t SRCS_GLUE < <(
   echo "$PT/aten/src/ATen/quantized/QTensorImpl.cpp"
   echo "$PT/aten/src/ATen/native/sparse/SparseTensor.cpp"
   find "$PT/aten/src/ATen/detail" -name '*HooksInterface.cpp'
-  echo stubs.cpp
-  echo shim.cpp
-  echo ops.cpp
+  echo atg_stubs.cpp
+  echo atg_shim.cpp
+  echo atg_ops.cpp
 )
 
 # layer 2+3 WITH CPU_CAPABILITY (the add/mul ufunc + DispatchStub kernels, and
