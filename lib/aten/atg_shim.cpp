@@ -29,6 +29,10 @@ at::Tensor make_cpu_tensor(const int64_t* sizes, size_t ndim,
 
 }  // namespace
 
+namespace atc_detail {
+std::atomic<long> live{0};
+}  // namespace atc_detail
+
 extern "C" {
 
 int8_t atc_default_dtype(void) {
@@ -44,7 +48,13 @@ atc_tensor atc_new(const int64_t* sizes, size_t ndim, atc_scalar_type dtype) {
       make_cpu_tensor(sizes, ndim, static_cast<c10::ScalarType>(dtype)));
 }
 
-void atc_free(atc_tensor t) { delete atc_to_ptr(t); }
+void atc_free(atc_tensor t) {
+  if (!t) return;
+  --atc_detail::live;
+  delete atc_to_ptr(t);
+}
+
+int64_t atc_live_count(void) { return atc_detail::live.load(); }
 
 int64_t atc_numel(atc_tensor t) { return atc_to_ptr(t)->numel(); }
 

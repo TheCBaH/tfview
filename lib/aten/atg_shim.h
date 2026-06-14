@@ -60,11 +60,26 @@ void atc_sizes(atc_tensor t, int64_t* out);
    Returns NULL on mismatch; the caller casts to the appropriate element type. */
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
 
+/* Number of live tensor handles: atc_wrap allocations not yet atc_free'd.
+   atc_wrap is the single allocation point (atc_new and every op wrapper go
+   through it), so this is an exact live count — used by the OCaml RAII layer's
+   leak / GC round-trip tests. */
+int64_t atc_live_count(void);
+
 #ifdef __cplusplus
 }
 
 /* C++ conversion helpers for use inside atg_shim.cpp and generated wrappers. */
+#include <atomic>
+
 #include <ATen/core/Tensor.h>
+
+namespace atc_detail {
+/* Live atc_tensor handles; bumped in atc_wrap, dropped in atc_free. Defined in
+   atg_shim.cpp. Atomic so the count stays correct no matter which thread a
+   handle is freed on (e.g. a GC finaliser). */
+extern std::atomic<long> live;
+}  // namespace atc_detail
 
 inline at::Tensor* atc_to_ptr(atc_tensor t) {
   return reinterpret_cast<at::Tensor*>(t);
@@ -73,6 +88,7 @@ inline atc_tensor atc_from_ptr(at::Tensor* t) {
   return reinterpret_cast<atc_tensor>(t);
 }
 inline atc_tensor atc_wrap(at::Tensor t) {
+  ++atc_detail::live;
   return atc_from_ptr(new at::Tensor(std::move(t)));
 }
 #endif

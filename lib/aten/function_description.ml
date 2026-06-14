@@ -32,4 +32,6 @@ module Functions (F : Ctypes.FOREIGN) = struct
 
   let data_ptr =
     foreign "atc_data_ptr" (atc_tensor @-> int8_t @-> returning (ptr void))
+
+  let live_count = foreign "atc_live_count" (void @-> returning int64_t)
 end

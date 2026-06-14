@@ -4,6 +4,16 @@ module F = C.Functions
 
 type float32_array = (float, float32_elt, c_layout) Array1.t
 
+(* RAII: attach a finaliser so the C++ at::Tensor behind [t] is atc_free'd when
+   the OCaml handle becomes unreachable. Returns [t] for chaining. Every handle
+   that crosses into OCaml (atc_new and op results) should be passed through
+   this exactly once; double-managing would double-free. *)
+let manage t =
+  Gc.finalise F.free t;
+  t
+
+(* Number of live (atc_wrap'd, not yet freed) C++ tensors. *)
+let live_count () = Int64.to_int (F.live_count ())
 let numel t = Int64.to_int (F.numel t)
 
 (* The tensor's shape as an int array (length = rank). *)
