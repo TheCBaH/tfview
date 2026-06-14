@@ -30,6 +30,17 @@
  (preprocess
   (pps ppx_expect)))
 
+; Per-operation expect tests over the real ATen bindings + static-dispatch
+; archive (replaces the former lib/aten/demo executable + cram).
+
+(library
+ (name aten_ops_test)
+ (modules aten_ops_test)
+ (libraries aten)
+ (inline_tests)
+ (preprocess
+  (pps ppx_expect)))
+
 ; Generate OCaml types from the PyTorch export schema.
 
 (rule
