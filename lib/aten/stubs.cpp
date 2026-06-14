@@ -24,6 +24,9 @@ namespace native {
 bool is_nonzero(const at::Tensor&) { MINSTUB("is_nonzero"); }
 at::Tensor dequantize_cpu_or_cuda(const at::Tensor&) { MINSTUB("dequantize"); }
 at::Tensor col_indices_default(const at::Tensor&) { MINSTUB("col_indices"); }
+// dropout's train=true mask path (Dropout.cpp); inference (train=false) is
+// identity and never reaches it.
+at::Tensor& bernoulli_(at::Tensor& self, double, std::optional<at::Generator>) { MINSTUB("bernoulli_"); return self; }
 at::Tensor crow_indices_default(const at::Tensor&) { MINSTUB("crow_indices"); }
 at::Tensor ccol_indices_default(const at::Tensor&) { MINSTUB("ccol_indices"); }
 at::Tensor row_indices_default(const at::Tensor&) { MINSTUB("row_indices"); }

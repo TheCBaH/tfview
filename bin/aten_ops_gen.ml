@@ -35,6 +35,8 @@ let selection =
     Allow { base = "linear"; overload = None };
     Allow { base = "batch_norm"; overload = None };
     Allow { base = "conv2d"; overload = None };
+    Allow { base = "dropout"; overload = None };
+    Allow { base = "dropout_"; overload = None };
     Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
   ]
 

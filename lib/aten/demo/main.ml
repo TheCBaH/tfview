@@ -154,6 +154,13 @@ let () =
   Format.printf "conv2d %a -> %a = %a\n" pp_shape (T.shape cv_x) pp_shape
     (T.shape cv_y) T.pp_float32
     (T.as_float32 cv_y |> Option.get);
+  (* dropout / dropout_ at inference (train=false) are the identity. *)
+  let dp = make [| 2; 3 |] in
+  set dp [ 1.; 2.; 3.; 4.; 5.; 6. ];
+  let dp_y = O.dropout dp 0.5 false in
+  show "dropout dp" dp_y (T.as_float32 dp_y |> Option.get);
+  let dp_z = O.dropout_ dp 0.5 false in
+  show "dropout_ dp" dp_z (T.as_float32 dp_z |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -183,4 +190,7 @@ let () =
   F.free cv_x;
   F.free cv_w;
   F.free cv_b;
-  F.free cv_y
+  F.free cv_y;
+  F.free dp;
+  F.free dp_y;
+  F.free dp_z

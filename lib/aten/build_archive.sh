@@ -128,6 +128,8 @@ mapfile -t SRCS_GLUE < <(
   echo "$PT/aten/src/ATen/native/Convolution.cpp"
   echo "$PT/aten/src/ATen/native/ConvolutionMM2d.cpp"
   echo "$PT/aten/src/ATen/native/Unfold2d.cpp"
+  # dropout/dropout_ (composite; identity at inference, train=false).
+  echo "$PT/aten/src/ATen/native/Dropout.cpp"
   echo "$PT/aten/src/ATen/native/ReduceOps.cpp"
   echo "$PT/aten/src/ATen/native/ReduceAllOps.cpp"
   # TensorIteratorBase::parallel_reduce (separate from TensorIterator.cpp).
