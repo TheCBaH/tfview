@@ -104,11 +104,11 @@ let%expect_test "max_pool2d" =
        2 false);
   [%expect "[1x1x2x2] = [6; 8; 14; 16]"]
 
-let%expect_test "adaptive_avg_pool2d (global mean)" =
+let%expect_test "adaptive_avg_pool2d" =
   show (O.adaptive_avg_pool2d (img ()) (arr [ 1; 1 ]) 2);
   [%expect "[1x1x1x1] = [8.5]"]
 
-let%expect_test "linear (addmm/gemm)" =
+let%expect_test "linear" =
   let x = make [ 1; 3 ] [ 1.; 2.; 3. ] in
   let w = make [ 2; 3 ] [ 1.; 0.; 0.; 0.; 1.; 1. ] in
   let b = make [ 2 ] [ 10.; 20. ] in
@@ -122,14 +122,14 @@ let%expect_test "batch_norm (inference)" =
   show (O.batch_norm x w b mean var false 0.1 0.0 false);
   [%expect "[1x2x1x2] = [3; 5; 7; 9]"]
 
-let%expect_test "conv2d (slow_conv2d)" =
+let%expect_test "conv2d" =
   let x = make [ 1; 1; 3; 3 ] [ 1.; 2.; 3.; 4.; 5.; 6.; 7.; 8.; 9. ] in
   let w = make [ 1; 1; 2; 2 ] [ 1.; 0.; 0.; 1. ] in
   let b = make [ 1 ] [ 0. ] in
   show (O.conv2d x w b (arr [ 1; 1 ]) 2 (arr [ 0; 0 ]) 2 (arr [ 1; 1 ]) 2 1L);
   [%expect "[1x1x2x2] = [6; 8; 12; 14]"]
 
-let%expect_test "dropout / dropout_ (inference identity)" =
+let%expect_test "dropout / dropout_ (inference)" =
   let t = make [ 2; 3 ] [ 1.; 2.; 3.; 4.; 5.; 6. ] in
   show (O.dropout t 0.5 false);
   show (O.dropout_ t 0.5 false);
@@ -141,10 +141,10 @@ let%expect_test "sigmoid" =
   show (O.sigmoid (make [ 3 ] [ 0.; 0.; 0. ]));
   [%expect "[3] = [0.5; 0.5; 0.5]"]
 
-let%expect_test "hardtanh_ (relu6)" =
+let%expect_test "hardtanh_" =
   show (O.hardtanh_ (make [ 3 ] [ -1.; 3.; 8. ]) 0.0 6.0);
   [%expect "[3] = [0; 3; 6]"]
 
-let%expect_test "silu_ (swish)" =
+let%expect_test "silu_" =
   show (O.silu_ (make [ 3 ] [ 0.; 2.; -2. ]));
   [%expect "[3] = [0; 1.76159; -0.238406]"]
