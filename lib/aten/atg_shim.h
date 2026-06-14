@@ -74,6 +74,12 @@ int atc_is_cpu(atc_tensor t);
    Returns NULL on mismatch; the caller casts to the appropriate element type. */
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
 
+/* Extract the single element of a one-element tensor, converting to the target
+   type. Writes *out and returns 1; on failure (e.g. numel != 1) returns 0 and
+   sets atc_last_error. */
+int atc_item_double(atc_tensor t, double* out);
+int atc_item_int64(atc_tensor t, int64_t* out);
+
 /* Message of the last shim error on this thread, or NULL if none. ATen throws
    c10::Error, which cannot cross extern "C"; throwing entry points (e.g.
    atc_new) catch it, stash the message here, and return a sentinel. Valid only

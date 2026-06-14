@@ -12,6 +12,7 @@ open Ctypes
 module F = Aten.C.Functions
 module O = Aten.C.Operations
 module Stype = Aten.Scalar_type
+module Dtype = Aten.Dtype
 module T = Aten.Tensor
 
 (* A managed, uninitialised tensor of [shape]. No data view is taken, so the
@@ -89,3 +90,61 @@ let%expect_test "error boundary: bad dtype raises Tensor.Error" =
   | exception T.Error _ -> print_string "raised Tensor.Error"
   | _ -> print_string "no error");
   [%expect "raised Tensor.Error"]
+
+let%expect_test "data: typed view round-trips; wrong dtype is None" =
+  let t = T.create [ 2; 2 ] in
+  let v = T.data Dtype.float32 t |> Option.get in
+  v.{0} <- 1.5;
+  v.{1} <- 2.5;
+  v.{2} <- 3.5;
+  v.{3} <- 4.5;
+  (* a fresh view sees the same backing store *)
+  let v2 = T.data Dtype.float32 t |> Option.get in
+  Printf.printf "%g %g %g %g\n" v2.{0} v2.{1} v2.{2} v2.{3};
+  Printf.printf "int64 view of a float tensor: %b\n"
+    (Option.is_none (T.data Dtype.int64 t));
+  [%expect {|
+    1.5 2.5 3.5 4.5
+    int64 view of a float tensor: true |}]
+
+let%expect_test "data: int64 tensor" =
+  let t = T.create ~dtype:Stype.Long [ 3 ] in
+  let v = T.data Dtype.int64 t |> Option.get in
+  v.{0} <- 10L;
+  v.{1} <- 20L;
+  v.{2} <- 30L;
+  Printf.printf "%Ld %Ld %Ld\n" v.{0} v.{1} v.{2};
+  [%expect "10 20 30"]
+
+let%expect_test "of_bigarray copies the source" =
+  let src =
+    Bigarray.Array1.of_array Bigarray.float32 Bigarray.c_layout
+      [| 1.; 2.; 3.; 4.; 5.; 6. |]
+  in
+  let t = T.of_bigarray Dtype.float32 src [ 2; 3 ] in
+  let v = T.data Dtype.float32 t |> Option.get in
+  Printf.printf "shape=%s data=%g,%g,%g,%g,%g,%g\n"
+    (ints (T.shape t))
+    v.{0} v.{1} v.{2} v.{3} v.{4} v.{5};
+  src.{0} <- 99.;
+  (* it's a copy: mutating src does not change the tensor *)
+  Printf.printf "after src.{0}<-99: %g\n"
+    (T.data Dtype.float32 t |> Option.get).{0};
+  [%expect {|
+    shape=[2;3] data=1,2,3,4,5,6
+    after src.{0}<-99: 1 |}]
+
+let%expect_test "item_float / item_int; numel<>1 raises" =
+  let tf = T.create [ 1 ] in
+  (T.data Dtype.float32 tf |> Option.get).{0} <- 42.5;
+  Printf.printf "item_float=%g\n" (T.item_float tf);
+  let ti = T.create ~dtype:Stype.Long [ 1 ] in
+  (T.data Dtype.int64 ti |> Option.get).{0} <- 7L;
+  Printf.printf "item_int=%d\n" (T.item_int ti);
+  (match T.item_float (T.create [ 2; 3 ]) with
+  | exception T.Error _ -> print_string "raised on numel<>1\n"
+  | _ -> print_string "no error\n");
+  [%expect {|
+    item_float=42.5
+    item_int=7
+    raised on numel<>1 |}]

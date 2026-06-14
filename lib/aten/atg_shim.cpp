@@ -102,4 +102,18 @@ void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype) {
   return a->unsafeGetTensorImpl()->storage().mutable_data();
 }
 
+int atc_item_double(atc_tensor t, double* out) {
+  ATC_TRY(0, {
+    *out = atc_to_ptr(t)->item().toDouble();
+    return 1;
+  })
+}
+
+int atc_item_int64(atc_tensor t, int64_t* out) {
+  ATC_TRY(0, {
+    *out = atc_to_ptr(t)->item().toLong();
+    return 1;
+  })
+}
+
 }  // extern "C"

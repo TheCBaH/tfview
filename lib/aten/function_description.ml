@@ -45,6 +45,12 @@ module Functions (F : Ctypes.FOREIGN) = struct
   let data_ptr =
     foreign "atc_data_ptr" (atc_tensor @-> int8_t @-> returning (ptr void))
 
+  let item_double =
+    foreign "atc_item_double" (atc_tensor @-> ptr double @-> returning int)
+
+  let item_int64 =
+    foreign "atc_item_int64" (atc_tensor @-> ptr int64_t @-> returning int)
+
   let live_count = foreign "atc_live_count" (void @-> returning int64_t)
   let last_error = foreign "atc_last_error" (void @-> returning string_opt)
 end

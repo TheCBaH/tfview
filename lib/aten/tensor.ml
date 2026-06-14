@@ -60,21 +60,50 @@ let read_dims fill t =
 let shape t = read_dims F.sizes t
 let strides t = read_dims F.strides t
 
-(* Return a Bigarray view over the tensor's contiguous buffer if its dtype
-   matches [dtype], or None on mismatch.  The view shares memory with the
-   tensor — the caller must not free the tensor while the view is live.
-   A Gc finaliser on the returned array keeps the OCaml handle reachable,
-   guarding against the GC collecting the handle box while the array exists;
-   explicit [F.free t] while a view is live remains the caller's responsibility. *)
-let as_float32 t : float32_array option =
-  let n = numel t in
-  let vp = F.data_ptr t (Scalar_type.to_int Scalar_type.Float) in
+(* A Bigarray view over the tensor's contiguous buffer at dtype [dt], or None if
+   the tensor's dtype differs. The view shares memory with the tensor (writes go
+   through), so the caller must not free the tensor while the view is live; a Gc
+   finaliser anchors the handle for as long as the view exists. The [Dtype.t] tag
+   ties the element/kind, so the returned array's type is checked at compile time. *)
+let data : type a b. (a, b) Dtype.t -> _ -> (a, b, c_layout) Array1.t option =
+ fun dt t ->
+  let vp = F.data_ptr t (Dtype.to_int dt) in
   if is_null vp then None
   else
-    let fp = from_voidp float vp in
-    let ba = bigarray_of_ptr array1 n float32 fp in
+    let p = from_voidp (Dtype.typ dt) vp in
+    let ba = bigarray_of_ptr array1 (numel t) (Dtype.kind dt) p in
     Gc.finalise (fun _ -> ignore t) ba;
     Some ba
+
+let as_float32 t : float32_array option = data Dtype.float32 t
+
+(* A managed tensor of [shape] and dtype [dt], copied from the 1-D [src] (whose
+   element count must equal the shape's). The tensor owns its own buffer, so
+   later mutating [src] does not affect it. *)
+let of_bigarray : type a b.
+    (a, b) Dtype.t -> (a, b, c_layout) Array1.t -> int list -> _ =
+ fun dt src shape ->
+  let t = create ~dtype:(Dtype.scalar_type dt) shape in
+  (match data dt t with
+  | Some dst ->
+      if Array1.dim dst <> Array1.dim src then
+        raise (Error "of_bigarray: element-count mismatch");
+      Array1.blit src dst
+  | None -> raise (Error "of_bigarray: dtype mismatch"));
+  t
+
+(* Extract the single element of a one-element tensor. Raises [Error] otherwise. *)
+let item_float t =
+  let out = allocate double 0.0 in
+  if F.item_double t out = 0 then
+    raise (Error (Option.value (F.last_error ()) ~default:"item failed"));
+  !@out
+
+let item_int t =
+  let out = allocate int64_t 0L in
+  if F.item_int64 t out = 0 then
+    raise (Error (Option.value (F.last_error ()) ~default:"item failed"));
+  Int64.to_int !@out
 
 let pp_float32 fmt (ba : float32_array) =
   let seq = Seq.init (Array1.dim ba) (fun i -> ba.{i}) in
