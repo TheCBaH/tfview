@@ -65,6 +65,7 @@ mapfile -t SRCS_CORE < <(
   find "$PT/c10/core" "$PT/c10/util" "$PT/c10/mobile" -name '*.cpp' ! -name '*test*'
   find "$PT/aten/src/ATen/core" -name '*.cpp' ! -name '*test*'
   echo gen/ATen/core/ATenOpList.cpp
+  echo "$PT/aten/src/ATen/TensorNames.cpp"
 )
 
 # layer 2+3: static-dispatch glue + native runtime that does NOT pull vec.h.
@@ -105,6 +106,19 @@ mapfile -t SRCS_GLUE < <(
   # real copy_ (reductions / type-cast / contiguous paths call it); replaces
   # the former throwing stub. Kernel is cpu/CopyKernel.cpp in the CAP list.
   echo "$PT/aten/src/ATen/native/Copy.cpp"
+  # linear -> at::addmm/mm/matmul (LinearAlgebra.cpp) -> cpublas::gemm host
+  # dispatcher (CPUBlas.cpp) -> gemm_stub kernel (cpu/BlasKernel.cpp, CAP).
+  # No external BLAS: BlasKernel ships a reference gemm fallback.
+  echo "$PT/aten/src/ATen/native/Linear.cpp"
+  echo "$PT/aten/src/ATen/native/LinearAlgebra.cpp"
+  echo "$PT/aten/src/ATen/native/CPUBlas.cpp"
+  # matmul/addmm pull in: mv/dot (Blas.cpp) and conj_physical/resolve_conj
+  # (UnaryOps.cpp); their unreached siblings --gc-section away.
+  echo "$PT/aten/src/ATen/native/Blas.cpp"
+  echo "$PT/aten/src/ATen/native/UnaryOps.cpp"
+  # gemv<T> / dot_impl<T> / blas_impl::fp16_gemv* (used by mv/dot); this is the
+  # native/ BlasKernel (capability-agnostic), distinct from cpu/BlasKernel.
+  echo "$PT/aten/src/ATen/native/BlasKernel.cpp"
   echo "$PT/aten/src/ATen/native/ReduceOps.cpp"
   echo "$PT/aten/src/ATen/native/ReduceAllOps.cpp"
   # TensorIteratorBase::parallel_reduce (separate from TensorIterator.cpp).
@@ -141,6 +155,10 @@ mapfile -t SRCS_CAP < <(
   echo "$PT/aten/src/ATen/native/cpu/CopyKernel.cpp"
   # conj_kernel / neg_kernel (CopyKernel uses them for conjugate/negative bits).
   echo "$PT/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp"
+  # cpublas_gemm_impl (the reference gemm registered to gemm_stub) for linear,
+  # plus the half/bfloat16 gemv fast-path helpers BlasKernel references.
+  echo "$PT/aten/src/ATen/native/cpu/BlasKernel.cpp"
+  echo "$PT/aten/src/ATen/native/cpu/ReducedPrecisionFloatGemvFastPathKernel.cpp"
   # REGISTER_DISPATCH(avg_pool2d_kernel, ...) — the vectorized pooling kernel.
   echo "$PT/aten/src/ATen/native/cpu/AvgPoolKernel.cpp"
 )

@@ -32,6 +32,7 @@ let selection =
     Allow { base = "flatten"; overload = Some "using_ints" };
     Allow { base = "max_pool2d"; overload = None };
     Allow { base = "adaptive_avg_pool2d"; overload = None };
+    Allow { base = "linear"; overload = None };
     Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
   ]
 

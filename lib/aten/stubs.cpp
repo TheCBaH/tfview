@@ -40,6 +40,10 @@ at::Tensor _sparse_compressed_tensor_unsafe_symint(const at::Tensor&, const at::
 // metal); the dense-CPU copy path never reaches them.
 at::Tensor& quantized_copy_from_float_(at::Tensor& self, const at::Tensor&) { MINSTUB("quantized_copy_from_float_"); return self; }
 
+// matmul/linear mkldnn fast path (LinearAlgebra.cpp); never taken for dense CPU.
+bool use_mkldnn_matmul(const at::Tensor&, const at::Tensor&, const at::Tensor&) { return false; }
+at::Tensor mkldnn_matmul(const at::Tensor&, const at::Tensor&, const at::Tensor&, float, float) { MINSTUB("mkldnn_matmul"); }
+
 }  // namespace native
 
 namespace vulkan {

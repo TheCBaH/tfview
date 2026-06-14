@@ -108,6 +108,21 @@ let () =
   Format.printf "adaptive_avg_pool2d %a -> %a = %a\n" pp_shape (T.shape img)
     pp_shape (T.shape adapted) T.pp_float32
     (T.as_float32 adapted |> Option.get);
+  (* linear: y = x @ W^T + b. x=[1,2,3] (1x3), W=[[1,0,0],[0,1,1]] (2x3),
+     b=[10,20] -> [11,25]. Exercises the addmm/gemm path. *)
+  let set t vs =
+    List.iteri (fun i v -> (T.as_float32 t |> Option.get).{i} <- v) vs
+  in
+  let lin_x = make [| 1; 3 |] in
+  set lin_x [ 1.; 2.; 3. ];
+  let lin_w = make [| 2; 3 |] in
+  set lin_w [ 1.; 0.; 0.; 0.; 1.; 1. ];
+  let lin_b = make [| 2 |] in
+  set lin_b [ 10.; 20. ];
+  let lin_y = O.linear lin_x lin_w lin_b in
+  Format.printf "linear x[1x3] W[2x3] b[2] -> %a = %a\n" pp_shape
+    (T.shape lin_y) T.pp_float32
+    (T.as_float32 lin_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -123,4 +138,8 @@ let () =
   F.free img;
   F.free pooled;
   F.free maxed;
-  F.free adapted
+  F.free adapted;
+  F.free lin_x;
+  F.free lin_w;
+  F.free lin_b;
+  F.free lin_y
