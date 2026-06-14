@@ -156,6 +156,8 @@ mapfile -t SRCS_CAP < <(
   echo "$PT/aten/src/ATen/native/cpu/FillKernel.cpp"
   # clamp_min_scalar_stub (used by relu via clamp_min in TensorCompare.cpp).
   echo "$PT/aten/src/ATen/native/cpu/TensorCompareKernel.cpp"
+  # activation kernels (silu_stub for silu_; siblings --gc-section away).
+  echo "$PT/aten/src/ATen/native/cpu/Activation.cpp"
   # max_pool2d_kernel (the vectorized pooling kernel).
   echo "$PT/aten/src/ATen/native/cpu/MaxPoolKernel.cpp"
   # adaptive_avg_pool2d_kernel + the reduction kernels behind at::mean/sum

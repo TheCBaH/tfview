@@ -172,6 +172,11 @@ let () =
   set ht [ -1.; 3.; 8. ];
   let ht_y = O.hardtanh_ ht 0.0 6.0 in
   show "hardtanh_ ht" ht_y (T.as_float32 ht_y |> Option.get);
+  (* silu_ (swish): in-place x*sigmoid(x); silu(0)=0. [0;2;-2]. *)
+  let si = make [| 3 |] in
+  set si [ 0.; 2.; -2. ];
+  let si_y = O.silu_ si in
+  show "silu_ si" si_y (T.as_float32 si_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -208,4 +213,6 @@ let () =
   F.free sg;
   F.free sg_y;
   F.free ht;
-  F.free ht_y
+  F.free ht_y;
+  F.free si;
+  F.free si_y
