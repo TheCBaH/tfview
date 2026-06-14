@@ -161,6 +161,11 @@ let () =
   show "dropout dp" dp_y (T.as_float32 dp_y |> Option.get);
   let dp_z = O.dropout_ dp 0.5 false in
   show "dropout_ dp" dp_z (T.as_float32 dp_z |> Option.get);
+  (* sigmoid: 1/(1+e^-x); sigmoid(0) = 0.5. *)
+  let sg = make [| 3 |] in
+  set sg [ 0.; 0.; 0. ];
+  let sg_y = O.sigmoid sg in
+  show "sigmoid sg" sg_y (T.as_float32 sg_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -193,4 +198,6 @@ let () =
   F.free cv_y;
   F.free dp;
   F.free dp_y;
-  F.free dp_z
+  F.free dp_z;
+  F.free sg;
+  F.free sg_y
