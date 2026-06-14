@@ -24,16 +24,22 @@ jobs:
       run: |
         echo "pytorch=$(git rev-parse HEAD:modules/pytorch)" >> $GITHUB_OUTPUT
         echo "month=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
+        # Hash the scripts that decide WHICH C++ sources are compiled and HOW
+        # (source lists + compile/link flags). A change here can invalidate
+        # ccache entries, so it belongs in the key.
+        echo "build=$(sha256sum lib/aten/build_archive.sh lib/aten/gen_macros.sh lib/aten/run_codegen.sh | sha256sum | cut -c1-16)" >> $GITHUB_OUTPUT
     # .ccache lives at the repo root, which the devcontainer bind-mounts, so the
     # host directory actions/cache manages and the CCACHE_DIR the container
-    # writes to are the same files. Keyed by month + the pinned PyTorch commit;
-    # the restore-keys prefix lets a new commit warm-start from the prior cache.
+    # writes to are the same files. Keyed by month + the pinned PyTorch commit +
+    # a hash of the build scripts; the restore-keys prefixes let a new commit or
+    # script change warm-start from the closest prior cache.
     - name: ccache cache
       uses: actions/cache@v5
       with:
         path: .ccache
-        key: ccache-${{ steps.cache_keys.outputs.month }}-${{ steps.cache_keys.outputs.pytorch }}
+        key: ccache-${{ steps.cache_keys.outputs.month }}-${{ steps.cache_keys.outputs.pytorch }}-${{ steps.cache_keys.outputs.build }}
         restore-keys: |
+          ccache-${{ steps.cache_keys.outputs.month }}-${{ steps.cache_keys.outputs.pytorch }}-
           ccache-${{ steps.cache_keys.outputs.month }}-
     - name: build
       run: |
