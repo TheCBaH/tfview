@@ -23,8 +23,6 @@ namespace native {
 // by the real Scalar.cpp / TensorConversions.cpp / SparseTensor.cpp.)
 bool is_nonzero(const at::Tensor&) { MINSTUB("is_nonzero"); }
 at::Tensor dequantize_cpu_or_cuda(const at::Tensor&) { MINSTUB("dequantize"); }
-at::Tensor& copy_(at::Tensor& self, const at::Tensor&, bool) { MINSTUB("copy_"); return self; }
-at::Tensor sum(const at::Tensor&, std::optional<c10::ScalarType>) { MINSTUB("sum"); }
 at::Tensor col_indices_default(const at::Tensor&) { MINSTUB("col_indices"); }
 at::Tensor crow_indices_default(const at::Tensor&) { MINSTUB("crow_indices"); }
 at::Tensor ccol_indices_default(const at::Tensor&) { MINSTUB("ccol_indices"); }
@@ -38,14 +36,19 @@ at::Tensor& arange_out(const at::Scalar&, const at::Scalar&, const at::Scalar&, 
 at::Tensor sparse_compressed_tensor_with_dims(int64_t, int64_t, at::IntArrayRef, at::IntArrayRef, at::ScalarType, std::optional<at::ScalarType>, std::optional<at::Layout>, std::optional<at::Device>, std::optional<bool>) { MINSTUB("sparse_compressed_tensor_with_dims"); }
 at::Tensor _sparse_compressed_tensor_unsafe_symint(const at::Tensor&, const at::Tensor&, const at::Tensor&, c10::SymIntArrayRef, std::optional<at::ScalarType>, std::optional<at::Layout>, std::optional<at::Device>, std::optional<bool>) { MINSTUB("_sparse_compressed_tensor_unsafe_symint"); }
 
-// sum.IntList structured op (referenced by RegisterCPU's wrapper_CPU_sum)
-void structured_sum_out::impl(const at::Tensor&, at::OptionalIntArrayRef, bool, std::optional<at::ScalarType>, const at::Tensor&) { MINSTUB("sum.impl"); }
+// Copy.cpp dispatches to these for non-CPU source tensors (quantized / vulkan /
+// metal); the dense-CPU copy path never reaches them.
+at::Tensor& quantized_copy_from_float_(at::Tensor& self, const at::Tensor&) { MINSTUB("quantized_copy_from_float_"); return self; }
 
 }  // namespace native
 
-namespace meta {
-void structured_sum_dim_IntList::meta(const at::Tensor&, at::OptionalIntArrayRef, bool, std::optional<at::ScalarType>) { MINSTUB("sum.meta"); }
-}  // namespace meta
+namespace vulkan {
+at::Tensor& vulkan_copy_(at::Tensor& self, const at::Tensor&) { MINSTUB("vulkan_copy_"); return self; }
+}  // namespace vulkan
+
+namespace metal {
+at::Tensor& metal_copy_(at::Tensor& self, const at::Tensor&) { MINSTUB("metal_copy_"); return self; }
+}  // namespace metal
 
 // --- quantizer leaves (TensorShape's is_quantized() branch in as_strided) ---
 // The QTensorImpl ctor + vtable come from the real (tiny) QTensorImpl.cpp; only

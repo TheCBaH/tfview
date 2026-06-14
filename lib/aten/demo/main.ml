@@ -101,6 +101,13 @@ let () =
   Format.printf "max_pool2d %a kernel [2x2] -> %a = %a\n" pp_shape (T.shape img)
     pp_shape (T.shape maxed) T.pp_float32
     (T.as_float32 maxed |> Option.get);
+  (* adaptive_avg_pool2d to (1,1): global mean of 1..16 = 8.5 (the resnet18
+     global-average-pool path). *)
+  let ada_os = i64 [ 1; 1 ] in
+  let adapted = O.adaptive_avg_pool2d img (CArray.start ada_os) 2 in
+  Format.printf "adaptive_avg_pool2d %a -> %a = %a\n" pp_shape (T.shape img)
+    pp_shape (T.shape adapted) T.pp_float32
+    (T.as_float32 adapted |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -115,4 +122,5 @@ let () =
   F.free fl;
   F.free img;
   F.free pooled;
-  F.free maxed
+  F.free maxed;
+  F.free adapted

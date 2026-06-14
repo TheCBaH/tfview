@@ -98,6 +98,17 @@ mapfile -t SRCS_GLUE < <(
   # meta+impl (DilatedMaxPool2d.cpp); the MaxPoolKernel is in the CAP list.
   echo "$PT/aten/src/ATen/native/Pooling.cpp"
   echo "$PT/aten/src/ATen/native/DilatedMaxPool2d.cpp"
+  # adaptive_avg_pool2d: composite (AdaptiveAveragePooling.cpp). The (1,1) case
+  # used by resnet18 reduces via at::mean (-> ReduceOps below); other sizes use
+  # the AdaptiveAvgPoolKernel in the CAP list.
+  echo "$PT/aten/src/ATen/native/AdaptiveAveragePooling.cpp"
+  # real copy_ (reductions / type-cast / contiguous paths call it); replaces
+  # the former throwing stub. Kernel is cpu/CopyKernel.cpp in the CAP list.
+  echo "$PT/aten/src/ATen/native/Copy.cpp"
+  echo "$PT/aten/src/ATen/native/ReduceOps.cpp"
+  echo "$PT/aten/src/ATen/native/ReduceAllOps.cpp"
+  # TensorIteratorBase::parallel_reduce (separate from TensorIterator.cpp).
+  echo "$PT/aten/src/ATen/native/TensorIteratorReduce.cpp"
   echo "$PT/aten/src/ATen/cpu/FlushDenormal.cpp"
   echo "$PT/aten/src/ATen/quantized/QTensorImpl.cpp"
   echo "$PT/aten/src/ATen/native/sparse/SparseTensor.cpp"
@@ -122,6 +133,14 @@ mapfile -t SRCS_CAP < <(
   echo "$PT/aten/src/ATen/native/cpu/TensorCompareKernel.cpp"
   # max_pool2d_kernel (the vectorized pooling kernel).
   echo "$PT/aten/src/ATen/native/cpu/MaxPoolKernel.cpp"
+  # adaptive_avg_pool2d_kernel + the reduction kernels behind at::mean/sum
+  # (mean_stub/sum_stub), needed by adaptive_avg_pool2d's global-average path.
+  echo "$PT/aten/src/ATen/native/cpu/AdaptiveAvgPoolKernel.cpp"
+  echo "$PT/aten/src/ATen/native/cpu/ReduceOpsKernel.cpp"
+  echo "$PT/aten/src/ATen/native/cpu/SumKernel.cpp"
+  echo "$PT/aten/src/ATen/native/cpu/CopyKernel.cpp"
+  # conj_kernel / neg_kernel (CopyKernel uses them for conjugate/negative bits).
+  echo "$PT/aten/src/ATen/native/cpu/UnaryOpsKernel.cpp"
   # REGISTER_DISPATCH(avg_pool2d_kernel, ...) — the vectorized pooling kernel.
   echo "$PT/aten/src/ATen/native/cpu/AvgPoolKernel.cpp"
 )
