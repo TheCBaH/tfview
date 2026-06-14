@@ -14,14 +14,51 @@ let manage t =
 
 (* Number of live (atc_wrap'd, not yet freed) C++ tensors. *)
 let live_count () = Int64.to_int (F.live_count ())
-let numel t = Int64.to_int (F.numel t)
 
-(* The tensor's shape as an int array (length = rank). *)
-let shape t =
+(* Raised when a shim call fails (ATen threw a c10::Error at the boundary). *)
+exception Error of string
+
+(* Raise [Error] if [t] is the failure sentinel (a null handle); otherwise
+   return it. The message comes from the thread-local atc_last_error. *)
+let check t =
+  if is_null t then
+    raise (Error (Option.value (F.last_error ()) ~default:"aten error"))
+  else t
+
+(* A new uninitialised contiguous CPU tensor, owned (freed by the GC via
+   [manage]). Raises [Error] on a bad shape/dtype. *)
+let create ?(dtype = Scalar_type.Float) shape =
+  let sizes = CArray.of_list int64_t (List.map Int64.of_int shape) in
+  F.new_ (CArray.start sizes)
+    (Unsigned.Size_t.of_int (List.length shape))
+    (Scalar_type.to_int dtype)
+  |> check |> manage
+
+let numel t = Int64.to_int (F.numel t)
+let dim t = Unsigned.Size_t.to_int (F.dim t)
+let element_size t = Int64.to_int (F.element_size t)
+let is_contiguous t = F.is_contiguous t <> 0
+let defined t = F.defined t <> 0
+let is_cpu t = F.is_cpu t <> 0
+
+(* The tensor's dtype. Total over the supported (CPU) dtype set. *)
+let scalar_type t =
+  let code = F.scalar_type t in
+  match Scalar_type.of_int code with
+  | Some s -> s
+  | None ->
+      raise (Error (Printf.sprintf "unsupported scalar type code %d" code))
+
+(* Read the [atc_dim] int64 entries written by [fill] (sizes or strides). *)
+let read_dims fill t =
   let n = Unsigned.Size_t.to_int (F.dim t) in
   let out = CArray.make int64_t n in
-  F.sizes t (CArray.start out);
+  fill t (CArray.start out);
   Array.init n (fun i -> Int64.to_int (CArray.get out i))
+
+(* The tensor's shape / strides as int arrays (length = rank). *)
+let shape t = read_dims F.sizes t
+let strides t = read_dims F.strides t
 
 (* Return a Bigarray view over the tensor's contiguous buffer if its dtype
    matches [dtype], or None on mismatch.  The view shares memory with the

@@ -1,6 +1,7 @@
 #include "atg_shim.h"
 
 #include <algorithm>
+#include <string>
 
 #include <ATen/Functions.h>
 #include <c10/core/CPUAllocator.h>
@@ -31,6 +32,10 @@ at::Tensor make_cpu_tensor(const int64_t* sizes, size_t ndim,
 
 namespace atc_detail {
 std::atomic<long> live{0};
+
+/* Thread-local so each OCaml-calling thread reads its own last error. */
+thread_local std::string last_error;
+void set_error(const char* msg) { last_error = msg ? msg : "unknown error"; }
 }  // namespace atc_detail
 
 extern "C" {
@@ -44,8 +49,15 @@ size_t atc_dtype_elem_size(int8_t scalar_type) {
 }
 
 atc_tensor atc_new(const int64_t* sizes, size_t ndim, atc_scalar_type dtype) {
-  return atc_wrap(
-      make_cpu_tensor(sizes, ndim, static_cast<c10::ScalarType>(dtype)));
+  ATC_TRY(nullptr, {
+    return atc_wrap(
+        make_cpu_tensor(sizes, ndim, static_cast<c10::ScalarType>(dtype)));
+  })
+}
+
+const char* atc_last_error(void) {
+  return atc_detail::last_error.empty() ? nullptr
+                                        : atc_detail::last_error.c_str();
 }
 
 void atc_free(atc_tensor t) {
@@ -64,6 +76,25 @@ void atc_sizes(atc_tensor t, int64_t* out) {
   auto sizes = atc_to_ptr(t)->sizes();
   std::copy(sizes.begin(), sizes.end(), out);
 }
+
+void atc_strides(atc_tensor t, int64_t* out) {
+  auto strides = atc_to_ptr(t)->strides();
+  std::copy(strides.begin(), strides.end(), out);
+}
+
+atc_scalar_type atc_dtype(atc_tensor t) {
+  return static_cast<atc_scalar_type>(atc_to_ptr(t)->scalar_type());
+}
+
+int64_t atc_element_size(atc_tensor t) { return atc_to_ptr(t)->element_size(); }
+
+int atc_is_contiguous(atc_tensor t) {
+  return atc_to_ptr(t)->is_contiguous() ? 1 : 0;
+}
+
+int atc_defined(atc_tensor t) { return atc_to_ptr(t)->defined() ? 1 : 0; }
+
+int atc_is_cpu(atc_tensor t) { return atc_to_ptr(t)->is_cpu() ? 1 : 0; }
 
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype) {
   auto* a = atc_to_ptr(t);

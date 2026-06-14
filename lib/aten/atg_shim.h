@@ -56,9 +56,29 @@ size_t atc_dim(atc_tensor t);
    the buffer using [atc_dim]. */
 void atc_sizes(atc_tensor t, int64_t* out);
 
+/* Write the tensor's strides (in elements) into [out], sized via [atc_dim]. */
+void atc_strides(atc_tensor t, int64_t* out);
+
+/* The tensor's dtype as a c10::ScalarType code. */
+atc_scalar_type atc_dtype(atc_tensor t);
+
+/* Size in bytes of one element of the tensor's dtype. */
+int64_t atc_element_size(atc_tensor t);
+
+/* 1 if the tensor is contiguous / defined / on CPU, else 0. */
+int atc_is_contiguous(atc_tensor t);
+int atc_defined(atc_tensor t);
+int atc_is_cpu(atc_tensor t);
+
 /* Raw data pointer, checking that the tensor's dtype matches.
    Returns NULL on mismatch; the caller casts to the appropriate element type. */
 void* atc_data_ptr(atc_tensor t, atc_scalar_type dtype);
+
+/* Message of the last shim error on this thread, or NULL if none. ATen throws
+   c10::Error, which cannot cross extern "C"; throwing entry points (e.g.
+   atc_new) catch it, stash the message here, and return a sentinel. Valid only
+   until the next shim call on the same thread. */
+const char* atc_last_error(void);
 
 /* Number of live tensor handles: atc_wrap allocations not yet atc_free'd.
    atc_wrap is the single allocation point (atc_new and every op wrapper go
@@ -79,7 +99,20 @@ namespace atc_detail {
    atg_shim.cpp. Atomic so the count stays correct no matter which thread a
    handle is freed on (e.g. a GC finaliser). */
 extern std::atomic<long> live;
+
+/* Stash a message for atc_last_error (thread-local; see atg_shim.cpp). */
+void set_error(const char* msg);
 }  // namespace atc_detail
+
+/* Run a shim body, converting any C++ exception into an atc_last_error message
+   and returning [sentinel] (c10::Error cannot cross extern "C"). */
+#define ATC_TRY(sentinel, ...)                 \
+  try {                                        \
+    __VA_ARGS__                                \
+  } catch (const std::exception& e) {          \
+    ::atc_detail::set_error(e.what());         \
+    return sentinel;                           \
+  }
 
 inline at::Tensor* atc_to_ptr(atc_tensor t) {
   return reinterpret_cast<at::Tensor*>(t);
