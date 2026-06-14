@@ -59,7 +59,7 @@ let die fmt =
 (* Parse a schema signature and run it through the generator, failing loudly if
    it cannot be parsed or the generator skips it (the selection is curated, so a
    skip is a configuration error, not an expected outcome). *)
-let generate_sig ~origin ~style (sg : string) : Aten_gen.Gen.generated =
+let generate_sig ~origin ~style sg =
   match Func_schema.parse sg with
   | Error e -> die "%s: parse error: %s" origin e
   | Ok op -> (
@@ -70,7 +70,7 @@ let generate_sig ~origin ~style (sg : string) : Aten_gen.Gen.generated =
 (* Find the native_functions.yaml entry matching [base]/[overload]. The call
    style follows the schema's [variants]: ops marked method-only have no at::
    free function, so they must be emitted as a Tensor method call. *)
-let find_entry (entries : Raw.t list) ~base ~overload : Raw.t =
+let find_entry entries ~base ~overload =
   let matches (e : Raw.t) =
     match Func_schema.parse e.func with
     | Error _ -> false
@@ -90,7 +90,7 @@ let style_of (e : Raw.t) =
   | [] -> `Function
   | vs -> if List.mem Raw.Variant.Function vs then `Function else `Method
 
-let resolve (entries : Raw.t list) : Aten_gen.Gen.generated list =
+let resolve entries =
   List.map
     (fun sel ->
       match sel with
