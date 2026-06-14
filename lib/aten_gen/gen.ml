@@ -77,7 +77,7 @@ let generate ?(style = `Function) (op : Func_ast.t) =
             let ctypes_in = match ctypes_in with [] -> [ "void" ] | l -> l in
             let ctypes_line =
               Printf.sprintf
-                "let %s = foreign \"%s\" (%s @-> returning atc_tensor)"
+                {|let %s = foreign "%s" (%s @-> returning atc_tensor)|}
                 ocaml_name c_name
                 (String.concat " @-> " ctypes_in)
             in
