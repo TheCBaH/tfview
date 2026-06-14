@@ -123,6 +123,21 @@ let () =
   Format.printf "linear x[1x3] W[2x3] b[2] -> %a = %a\n" pp_shape
     (T.shape lin_y) T.pp_float32
     (T.as_float32 lin_y |> Option.get);
+  (* batch_norm (inference): y = (x-mean)/sqrt(var+eps)*w + b, per channel.
+     x[1x2x1x2] ch0=[1,2] ch1=[3,4], mean=0 var=1 eps=0 w=2 b=1 -> 2x+1
+     = [3;5;7;9]. *)
+  let bn_x = make [| 1; 2; 1; 2 |] in
+  set bn_x [ 1.; 2.; 3.; 4. ];
+  let bn_w = make [| 2 |] and bn_b = make [| 2 |] in
+  set bn_w [ 2.; 2. ];
+  set bn_b [ 1.; 1. ];
+  let bn_m = make [| 2 |] and bn_v = make [| 2 |] in
+  set bn_m [ 0.; 0. ];
+  set bn_v [ 1.; 1. ];
+  let bn_y = O.batch_norm bn_x bn_w bn_b bn_m bn_v false 0.1 0.0 false in
+  Format.printf "batch_norm %a -> %a = %a\n" pp_shape (T.shape bn_x) pp_shape
+    (T.shape bn_y) T.pp_float32
+    (T.as_float32 bn_y |> Option.get);
   F.free a;
   F.free b;
   F.free c;
@@ -142,4 +157,10 @@ let () =
   F.free lin_x;
   F.free lin_w;
   F.free lin_b;
-  F.free lin_y
+  F.free lin_y;
+  F.free bn_x;
+  F.free bn_w;
+  F.free bn_b;
+  F.free bn_m;
+  F.free bn_v;
+  F.free bn_y

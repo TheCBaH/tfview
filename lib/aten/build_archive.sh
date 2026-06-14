@@ -66,6 +66,7 @@ mapfile -t SRCS_CORE < <(
   find "$PT/aten/src/ATen/core" -name '*.cpp' ! -name '*test*'
   echo gen/ATen/core/ATenOpList.cpp
   echo "$PT/aten/src/ATen/TensorNames.cpp"
+  echo "$PT/aten/src/ATen/AccumulateType.cpp"
 )
 
 # layer 2+3: static-dispatch glue + native runtime that does NOT pull vec.h.
@@ -119,6 +120,9 @@ mapfile -t SRCS_GLUE < <(
   # gemv<T> / dot_impl<T> / blas_impl::fp16_gemv* (used by mv/dot); this is the
   # native/ BlasKernel (capability-agnostic), distinct from cpu/BlasKernel.
   echo "$PT/aten/src/ATen/native/BlasKernel.cpp"
+  # batch_norm: composite -> _batch_norm_impl_index -> native_batch_norm
+  # (Normalization.cpp); CPU kernel is cpu/batch_norm_kernel.cpp (CAP).
+  echo "$PT/aten/src/ATen/native/Normalization.cpp"
   echo "$PT/aten/src/ATen/native/ReduceOps.cpp"
   echo "$PT/aten/src/ATen/native/ReduceAllOps.cpp"
   # TensorIteratorBase::parallel_reduce (separate from TensorIterator.cpp).
@@ -159,6 +163,8 @@ mapfile -t SRCS_CAP < <(
   # plus the half/bfloat16 gemv fast-path helpers BlasKernel references.
   echo "$PT/aten/src/ATen/native/cpu/BlasKernel.cpp"
   echo "$PT/aten/src/ATen/native/cpu/ReducedPrecisionFloatGemvFastPathKernel.cpp"
+  # batch_norm_cpu_stub (the vectorized batch-norm kernel).
+  echo "$PT/aten/src/ATen/native/cpu/batch_norm_kernel.cpp"
   # REGISTER_DISPATCH(avg_pool2d_kernel, ...) — the vectorized pooling kernel.
   echo "$PT/aten/src/ATen/native/cpu/AvgPoolKernel.cpp"
 )
