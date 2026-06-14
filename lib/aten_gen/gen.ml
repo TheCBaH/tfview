@@ -28,7 +28,7 @@ let in_args (args : Func_ast.Arguments.t) = args.positional @ args.kwarg_only
    function at::<op>(...); [`Method] emits <recv>-><op>(...) on the first
    (Tensor) argument, for ops the schema marks `variants: method` only (e.g.
    in-place ops like add_), which have no at:: free function. *)
-let generate ?(style = `Function) (op : Func_ast.t) : result =
+let generate ?(style = `Function) (op : Func_ast.t) =
   if op.arguments.out <> [] then Skipped "out= variant"
   else
     match C_type.map_returns op.returns with

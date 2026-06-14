@@ -1,7 +1,7 @@
 (* OCaml encoding of c10::ScalarType / atc_scalar_type from shim.h. *)
 type t = Byte | Char | Short | Int | Long | Half | Float | Double | Bool
 
-let to_int : t -> int = function
+let to_int = function
   | Byte -> 0
   | Char -> 1
   | Short -> 2
@@ -12,7 +12,7 @@ let to_int : t -> int = function
   | Double -> 7
   | Bool -> 11
 
-let of_int : int -> t option = function
+let of_int = function
   | 0 -> Some Byte
   | 1 -> Some Char
   | 2 -> Some Short

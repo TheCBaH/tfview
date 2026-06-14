@@ -22,7 +22,7 @@ let unsupported = None
 
 (* Map an argument [name] of schema type [ty] to its C representation, or
    [None] if any constituent type is outside the supported set. *)
-let map_type ~name (ty : Func_ast.Type.t) : arg option =
+let map_type ~name (ty : Func_ast.Type.t) =
   match ty with
   | Base Tensor ->
       Some
@@ -99,7 +99,7 @@ let map_type ~name (ty : Func_ast.Type.t) : arg option =
   | Base _ | Optional _ | List _ -> unsupported
 
 (* The supported return shapes. Initially: exactly one Tensor. *)
-let map_returns (returns : Func_ast.Return.t list) : ret option =
+let map_returns (returns : Func_ast.Return.t list) =
   match returns with
   | [ { ty = Base Tensor; _ } ] -> Some Tensor_ret
   | _ -> unsupported

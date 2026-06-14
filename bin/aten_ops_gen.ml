@@ -25,7 +25,7 @@ type selection =
    name (+ optional overload); [custom sig] overrides with a hand-written
    signature for ops the generator cannot emit unmodified. *)
 let op ?overload base = Allow { base; overload }
-let custom sig_ = Override sig_
+let custom signature = Override signature
 
 let selection =
   [
