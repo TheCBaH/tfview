@@ -21,26 +21,32 @@ type selection =
   | Allow of { base : string; overload : string option }
   | Override of string
 
+(* [op "name"] / [op "name" ~overload:"X"] selects an op from the yaml by base
+   name (+ optional overload); [custom sig] overrides with a hand-written
+   signature for ops the generator cannot emit unmodified. *)
+let op ?overload base = Allow { base; overload }
+let custom sig_ = Override sig_
+
 let selection =
   [
-    Allow { base = "add"; overload = Some "Tensor" };
-    Allow { base = "add_"; overload = Some "Tensor" };
-    Allow { base = "mul"; overload = Some "Tensor" };
-    Allow { base = "relu"; overload = None };
-    Allow { base = "relu_"; overload = None };
-    Allow { base = "sigmoid"; overload = None };
-    Allow { base = "hardtanh_"; overload = None };
-    Allow { base = "silu_"; overload = None };
-    Allow { base = "reshape"; overload = None };
-    Allow { base = "flatten"; overload = Some "using_ints" };
-    Allow { base = "max_pool2d"; overload = None };
-    Allow { base = "adaptive_avg_pool2d"; overload = None };
-    Allow { base = "linear"; overload = None };
-    Allow { base = "batch_norm"; overload = None };
-    Allow { base = "conv2d"; overload = None };
-    Allow { base = "dropout"; overload = None };
-    Allow { base = "dropout_"; overload = None };
-    Override "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
+    op "add" ~overload:"Tensor";
+    op "add_" ~overload:"Tensor";
+    op "mul" ~overload:"Tensor";
+    op "relu";
+    op "relu_";
+    op "sigmoid";
+    op "hardtanh_";
+    op "silu_";
+    op "reshape";
+    op "flatten" ~overload:"using_ints";
+    op "max_pool2d";
+    op "adaptive_avg_pool2d";
+    op "linear";
+    op "batch_norm";
+    op "conv2d";
+    op "dropout";
+    op "dropout_";
+    custom "avg_pool2d(Tensor self, int[2] kernel_size) -> Tensor";
   ]
 
 let die fmt =
