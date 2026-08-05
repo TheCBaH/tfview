@@ -53,6 +53,17 @@ runs:
         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
         TAG="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
         TAG=$(echo $TAG | tr '[A-Z].' '[a-z]_')
+        # Only the branch/tag being built pushes to $IMAGE_ID:$TAG, so on a
+        # freshly created branch (and on tag builds, which never push) that
+        # tag doesn't exist yet and the layer cache would be empty. The
+        # default branch's tag is the best second chance; --cache-from can be
+        # repeated, and importing a missing manifest is a warning, not an
+        # error.
+        DEFAULT_TAG=$(echo '${{ github.event.repository.default_branch }}' | tr '[A-Z].' '[a-z]_')
+        CACHE_ARGS="--cache-from $IMAGE_ID:$TAG"
+        if [ -n "$DEFAULT_TAG" -a "$DEFAULT_TAG" != "$TAG" ]; then
+          CACHE_ARGS="$CACHE_ARGS --cache-from $IMAGE_ID:$DEFAULT_TAG"
+        fi
         old_id=''
         if docker pull $IMAGE_ID:$TAG; then
           old_id=$(docker image inspect $IMAGE_ID:$TAG --format "{{.ID}}")
@@ -61,7 +72,7 @@ runs:
         mkdir -p ~/.claude
         touch ~/.claude.json
         echo "::group::build"
-        env BUILDKIT_PROGRESS=plain devcontainer build --image-name $IMAGE_ID --cache-from $IMAGE_ID:$TAG --workspace-folder .
+        env BUILDKIT_PROGRESS=plain devcontainer build --image-name $IMAGE_ID $CACHE_ARGS --workspace-folder .
         echo "::group::up"
         env BUILDKIT_PROGRESS=plain devcontainer up --workspace-folder .
         echo "exec=devcontainer exec --workspace-folder ." >> $GITHUB_OUTPUT
