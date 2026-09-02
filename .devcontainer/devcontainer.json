@@ -2,7 +2,8 @@
 {
     "name": "tfview",
     "build":  {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile",
+        "cacheFrom": "ghcr.io/thecbah/tfview/devcontainer-x86_64:master"
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils:2": {
