@@ -1363,6 +1363,41 @@ module rec Tflite : sig
     val pack : Rt.Builder.t -> obj -> t Rt.wip
   end
 
+  (* Table tflite.MultiAxisQuantization (//schema.fbs) *)
+  and MultiAxisQuantization : sig
+    type t
+
+    module Vector : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    module Vector64 : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val quantized_dimensions : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
+
+    module Builder : sig
+      type t
+
+      val start : Rt.Builder.t -> t
+      val finish : t -> MultiAxisQuantization.t Rt.wip
+      val add_scales : Rt.Int.t -> t -> t
+      val add_zero_points : Rt.Int.t -> t -> t
+      val add_block_size : Rt.Int.t -> t -> t
+      val add_quantized_dimensions : Rt.Int.Vector.t Rt.wip -> t -> t
+    end
+
+    type obj = {
+      scales : Rt.Int.t;
+      zero_points : Rt.Int.t;
+      block_size : Rt.Int.t;
+      quantized_dimensions : Rt.Int.t array;
+    }
+
+    val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
+    val pack : Rt.Builder.t -> obj -> t Rt.wip
+  end
+
   (* Table tflite.NegOptions (//schema.fbs) *)
   and NegOptions : sig
     type t
@@ -3872,6 +3907,7 @@ module rec Tflite : sig
     val none : t
     val custom_quantization : t
     val blockwise_quantization : t
+    val multi_axis_quantization : t
 
     val of_underlying : Rt.UType.t -> t
     val to_string : t -> string
@@ -3880,6 +3916,7 @@ module rec Tflite : sig
       | `None_
       | `CustomQuantization of CustomQuantization.obj
       | `BlockwiseQuantization of BlockwiseQuantization.obj
+      | `MultiAxisQuantization of MultiAxisQuantization.obj
     ]
   end
 
@@ -4012,6 +4049,8 @@ module rec Tflite : sig
     val bfloat16 : t
     val int2 : t
     val uint4 : t
+    val float8_e4_m3_fn : t
+    val float8_e5_m2 : t
 
     val of_underlying : Rt.Byte.t -> t
     val to_string : t -> string
@@ -4764,7 +4803,7 @@ module rec Tflite : sig
     val scale : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Float.Vector.t) Rt.fbopt
     val zero_point : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Long.Vector.t) Rt.fbopt
     val details_type : 'b Rt.buf -> ('b, t) Rt.fb -> QuantizationDetails.t
-    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
+    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> ?multi_axis_quantization:(('b, MultiAxisQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
     val quantized_dimension : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
 
     module Builder : sig
@@ -4778,6 +4817,7 @@ module rec Tflite : sig
       val add_zero_point : Rt.Long.Vector.t Rt.wip -> t -> t
       val add_details_custom_quantization : CustomQuantization.t Rt.wip -> t -> t
       val add_details_blockwise_quantization : BlockwiseQuantization.t Rt.wip -> t -> t
+      val add_details_multi_axis_quantization : MultiAxisQuantization.t Rt.wip -> t -> t
       val add_quantized_dimension : Rt.Int.t -> t -> t
     end
 
