@@ -4,7 +4,7 @@
     flatc version: 25.12.19
 *)
 
-[@@@warning "-32"]
+[@@@warning "-32-39"]
 
 module Rt = Flatbuffers.Runtime
 
@@ -183,6 +183,1104 @@ module Union = struct
     | 2L when Option.is_some uint16_vector -> Option.get uint16_vector (Rt.Ref.read_table b o i)
     | 3L when Option.is_some uint8_vector -> Option.get uint8_vector (Rt.Ref.read_table b o i)
     | _ -> default t
+end
+
+module Verify = struct
+  module V = Flatbuffers.Verifier
+
+  let rec table_atan2_options__0 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_abs_options__1 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_add_noptions__2 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_add_options__3 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"pot_scale_int16" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_arg_max_options__4 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"output_type" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_arg_min_options__5 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"output_type" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_assign_variable_options__6 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_batch_mat_mul_options__7 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"adj_x" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"adj_y" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_batch_to_space_ndoptions__8 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_bidirectional_sequence_lstmoptions__9 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"cell_clip" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"proj_clip" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"merge_outputs" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"time_major" ~voff:12 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:14 ~required:false ~size:1 ~align:1
+         )
+  and table_bidirectional_sequence_rnnoptions__10 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"time_major" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"fused_activation_function" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"merge_outputs" ~voff:8 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:10 ~required:false ~size:1 ~align:1
+         )
+  and table_bitcast_options__11 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_bitwise_xor_options__12 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_blockwise_quantization__13 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"scales" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"zero_points" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"block_size" ~voff:8 ~required:false ~size:4 ~align:4
+         )
+  and table_broadcast_to_options__14 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_bucketize_options__15 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"boundaries" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_buffer__16 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"data" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         && V.field_inline v ~name:"offset" ~voff:6 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"size" ~voff:8 ~required:false ~size:8 ~align:8
+         )
+  and table_call_once_options__17 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"init_subgraph_index" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_call_options__18 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"subgraph" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_cast_options__19 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"in_data_type" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"out_data_type" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_concat_embeddings_options__20 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"num_channels" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"num_columns_per_channel" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"embedding_dim_per_channel" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_concatenation_options__21 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"axis" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_conv2_doptions__22 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"padding" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"stride_w" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_h" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"dilation_w_factor" ~voff:12 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"dilation_h_factor" ~voff:14 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"quantized_bias_type" ~voff:16 ~required:false ~size:1 ~align:1
+         )
+  and table_conv3_doptions__23 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"padding" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"stride_d" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_w" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_h" ~voff:10 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:12 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"dilation_d_factor" ~voff:14 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"dilation_w_factor" ~voff:16 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"dilation_h_factor" ~voff:18 ~required:false ~size:4 ~align:4
+         )
+  and table_cos_options__24 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_cumsum_options__25 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"exclusive" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"reverse" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_custom_quantization__26 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"custom" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         )
+  and table_densify_options__27 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_depth_to_space_options__28 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"block_size" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_depthwise_conv2_doptions__29 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"padding" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"stride_w" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_h" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"depth_multiplier" ~voff:10 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:12 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"dilation_w_factor" ~voff:14 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"dilation_h_factor" ~voff:16 ~required:false ~size:4 ~align:4
+         )
+  and table_dequantize_options__30 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_dilate_options__31 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_dimension_metadata__32 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"format" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"dense_size" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_union v ~name:"array_segments" ~type_voff:8 ~voff:10 ~required:false ~tag_size:1 union_sparse_index_vector__173
+         && V.field_union v ~name:"array_indices" ~type_voff:12 ~voff:14 ~required:false ~tag_size:1 union_sparse_index_vector__173
+         )
+  and table_div_options__33 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_dynamic_update_slice_options__34 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_embedding_lookup_sparse_options__35 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"combiner" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_equal_options__36 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_exp_options__37 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_expand_dims_options__38 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_external_buffer__39 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"id" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"group" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"offset" ~voff:8 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"length" ~voff:10 ~required:false ~size:8 ~align:8
+         && V.field_string v ~name:"packing" ~voff:12 ~required:false ~off64:false
+         )
+  and table_external_buffer_group__40 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"name" ~voff:4 ~required:false ~off64:false
+         )
+  and table_fake_quant_options__41 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"min" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"max" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"num_bits" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"narrow_range" ~voff:10 ~required:false ~size:1 ~align:1
+         )
+  and table_fill_options__42 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_floor_div_options__43 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_floor_mod_options__44 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_fully_connected_options__45 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"weights_format" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"keep_num_dims" ~voff:8 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"quantized_bias_type" ~voff:12 ~required:false ~size:1 ~align:1
+         )
+  and table_gather_nd_options__46 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_gather_options__47 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"axis" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"batch_dims" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_gelu_options__48 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"approximate" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_greater_equal_options__49 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_greater_options__50 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_hard_swish_options__51 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_hashtable_find_options__52 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_hashtable_import_options__53 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_hashtable_options__54 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"table_id" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"key_dtype" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"value_dtype" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_hashtable_size_options__55 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_if_options__56 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"then_subgraph_index" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"else_subgraph_index" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_int32_vector__57 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"values" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_l2_norm_options__58 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_lshprojection_options__59 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"type_" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_lstmoptions__60 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"cell_clip" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"proj_clip" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"kernel_type" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:12 ~required:false ~size:1 ~align:1
+         )
+  and table_leaky_relu_options__61 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"alpha" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_less_equal_options__62 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_less_options__63 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_local_response_normalization_options__64 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"radius" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"bias" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"alpha" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"beta" ~voff:10 ~required:false ~size:4 ~align:4
+         )
+  and table_log_softmax_options__65 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_logical_and_options__66 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_logical_not_options__67 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_logical_or_options__68 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_matrix_diag_options__69 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_matrix_set_diag_options__70 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_maximum_minimum_options__71 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_metadata__72 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"name" ~voff:4 ~required:false ~off64:false
+         && V.field_inline v ~name:"buffer" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_mirror_pad_options__73 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"mode" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_model__74 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"version" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_vector_table v ~name:"operator_codes" ~voff:6 ~required:false ~off64:false ~vec64:false table_operator_code__83
+         && V.field_vector_table v ~name:"subgraphs" ~voff:8 ~required:false ~off64:false ~vec64:false table_sub_graph__148
+         && V.field_string v ~name:"description" ~voff:10 ~required:false ~off64:false
+         && V.field_vector_table v ~name:"buffers" ~voff:12 ~required:false ~off64:false ~vec64:false table_buffer__16
+         && V.field_vector v ~name:"metadata_buffer" ~voff:14 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector_table v ~name:"metadata" ~voff:16 ~required:false ~off64:false ~vec64:false table_metadata__72
+         && V.field_vector_table v ~name:"signature_defs" ~voff:18 ~required:false ~off64:false ~vec64:false table_signature_def__113
+         && V.field_vector_table v ~name:"external_buffer_groups" ~voff:20 ~required:false ~off64:false ~vec64:false table_external_buffer_group__40
+         && V.field_vector_table v ~name:"external_buffers" ~voff:22 ~required:false ~off64:false ~vec64:false table_external_buffer__39
+         )
+  and table_mul_options__75 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_multi_axis_quantization__76 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"scales" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"zero_points" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"block_size" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"quantized_dimensions" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_neg_options__77 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_non_max_suppression_v4_options__78 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_non_max_suppression_v5_options__79 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_not_equal_options__80 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_one_hot_options__81 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"axis" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_operator__82 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"opcode_index" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"inputs" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"outputs" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_union v ~name:"builtin_options" ~type_voff:10 ~voff:12 ~required:false ~tag_size:1 union_builtin_options__170
+         && V.field_vector v ~name:"custom_options" ~voff:14 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         && V.field_inline v ~name:"custom_options_format" ~voff:16 ~required:false ~size:1 ~align:1
+         && V.field_vector v ~name:"mutating_variable_inputs" ~voff:18 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         && V.field_vector v ~name:"intermediates" ~voff:20 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_inline v ~name:"large_custom_options_offset" ~voff:22 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"large_custom_options_size" ~voff:24 ~required:false ~size:8 ~align:8
+         && V.field_union v ~name:"builtin_options2" ~type_voff:26 ~voff:28 ~required:false ~tag_size:1 union_builtin_options2__171
+         && V.field_inline v ~name:"debug_metadata_index" ~voff:30 ~required:false ~size:4 ~align:4
+         )
+  and table_operator_code__83 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"deprecated_builtin_code" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_string v ~name:"custom_code" ~voff:6 ~required:false ~off64:false
+         && V.field_inline v ~name:"version" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"builtin_code" ~voff:10 ~required:false ~size:4 ~align:4
+         )
+  and table_pack_options__84 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"values_count" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"axis" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_pad_options__85 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_pad_v2_options__86 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_pool2_doptions__87 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"padding" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"stride_w" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_h" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"filter_width" ~voff:10 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"filter_height" ~voff:12 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:14 ~required:false ~size:1 ~align:1
+         )
+  and table_pow_options__88 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_quantization_parameters__89 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"min" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"max" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"scale" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"zero_point" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_union v ~name:"details" ~type_voff:12 ~voff:14 ~required:false ~tag_size:1 union_quantization_details__172
+         && V.field_inline v ~name:"quantized_dimension" ~voff:16 ~required:false ~size:4 ~align:4
+         )
+  and table_quantize_options__90 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_rnnoptions__91 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_random_options__92 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"seed" ~voff:4 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"seed2" ~voff:6 ~required:false ~size:8 ~align:8
+         )
+  and table_range_options__93 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_rank_options__94 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_read_variable_options__95 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_reduce_window_options__96 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"reduce_function" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_reducer_options__97 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"keep_dims" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_reshape_options__98 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"new_shape" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_resize_bilinear_options__99 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"align_corners" ~voff:8 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"half_pixel_centers" ~voff:10 ~required:false ~size:1 ~align:1
+         )
+  and table_resize_nearest_neighbor_options__100 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"align_corners" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"half_pixel_centers" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_reverse_sequence_options__101 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"seq_dim" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"batch_dim" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_reverse_v2_options__102 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_rfft2_d_options__103 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_right_shift_options__104 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_svdfoptions__105 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"rank" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_scatter_nd_options__106 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_segment_sum_options__107 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_select_options__108 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_select_v2_options__109 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_sequence_rnnoptions__110 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"time_major" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"fused_activation_function" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_shape_options__111 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"out_type" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_sign_options__112 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_signature_def__113 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector_table v ~name:"inputs" ~voff:4 ~required:false ~off64:false ~vec64:false table_tensor_map__151
+         && V.field_vector_table v ~name:"outputs" ~voff:6 ~required:false ~off64:false ~vec64:false table_tensor_map__151
+         && V.field_string v ~name:"signature_key" ~voff:8 ~required:false ~off64:false
+         && V.field_inline v ~name:"subgraph_index" ~voff:12 ~required:false ~size:4 ~align:4
+         )
+  and table_skip_gram_options__114 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"ngram_size" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"max_skip_size" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"include_all_ngrams" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_slice_options__115 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_softmax_options__116 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"beta" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_space_to_batch_ndoptions__117 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_space_to_depth_options__118 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"block_size" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_sparse_to_dense_options__119 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"validate_indices" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_sparsity_parameters__120 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"traversal_order" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"block_map" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector_table v ~name:"dim_metadata" ~voff:8 ~required:false ~off64:false ~vec64:false table_dimension_metadata__32
+         )
+  and table_split_options__121 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"num_splits" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_split_voptions__122 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"num_splits" ~voff:4 ~required:false ~size:4 ~align:4
+         )
+  and table_square_options__123 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_squared_difference_options__124 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_squeeze_options__125 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"squeeze_dims" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_stable_hlocomposite_options__126 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"name" ~voff:4 ~required:false ~off64:false
+         && V.field_inline v ~name:"decomposition_subgraph_index" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"composite_attributes" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         && V.field_inline v ~name:"composite_attributes_format" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"version" ~voff:12 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_broadcast_in_dim_options__127 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"broadcast_dimensions" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         )
+  and table_stablehlo_case_options__128 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"branch_subgraph_indices" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_stablehlo_compare_options__129 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"comparison_direction" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"compare_type" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_concatenate_options__130 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"dimension" ~voff:4 ~required:false ~size:8 ~align:8
+         )
+  and table_stablehlo_convolution_options__131 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"window_strides" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"padding" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"lhs_dilation" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"rhs_dilation" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"window_reversal" ~voff:12 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         && V.field_inline v ~name:"input_batch_dimension" ~voff:14 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"input_feature_dimension" ~voff:16 ~required:false ~size:8 ~align:8
+         && V.field_vector v ~name:"input_spatial_dimensions" ~voff:18 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"kernel_input_feature_dimension" ~voff:20 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"kernel_output_feature_dimension" ~voff:22 ~required:false ~size:8 ~align:8
+         && V.field_vector v ~name:"kernel_spatial_dimensions" ~voff:24 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"output_batch_dimension" ~voff:26 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"output_feature_dimension" ~voff:28 ~required:false ~size:8 ~align:8
+         && V.field_vector v ~name:"output_spatial_dimensions" ~voff:30 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"feature_group_count" ~voff:32 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"batch_group_count" ~voff:34 ~required:false ~size:8 ~align:8
+         && V.field_vector v ~name:"precision_config" ~voff:36 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_stablehlo_custom_call_options__132 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"call_target_name" ~voff:4 ~required:false ~off64:false
+         && V.field_inline v ~name:"has_side_effect" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_string v ~name:"backend_config" ~voff:8 ~required:false ~off64:false
+         && V.field_inline v ~name:"api_version" ~voff:10 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"called_computations" ~voff:12 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"custom_attributes" ~voff:14 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         )
+  and table_stablehlo_dot_general_options__133 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"lhs_batching_dimensions" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"rhs_batching_dimensions" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"lhs_contracting_dimensions" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"rhs_contracting_dimensions" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"precision_config" ~voff:12 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         )
+  and table_stablehlo_dynamic_slice_options__134 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"slice_sizes" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         )
+  and table_stablehlo_gather_options__135 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"offset_dims" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"collapsed_slice_dims" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"start_index_map" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"index_vector_dim" ~voff:10 ~required:false ~size:8 ~align:8
+         && V.field_vector v ~name:"slice_sizes" ~voff:12 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"indices_are_sorted" ~voff:14 ~required:false ~size:1 ~align:1
+         )
+  and table_stablehlo_iota_options__136 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"iota_dimension" ~voff:4 ~required:false ~size:8 ~align:8
+         )
+  and table_stablehlo_pad_options__137 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"edge_padding_low" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"edge_padding_high" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"interior_padding" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         )
+  and table_stablehlo_reduce_options__138 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"dimensions" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"body_subgraph_index" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_reduce_window_options__139 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"window_dimensions" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"window_strides" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"base_dilations" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"window_dilations" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"padding" ~voff:12 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"body_subgraph_index" ~voff:14 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_rng_bit_generator_options__140 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"algorithm" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_stablehlo_scatter_options__141 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"indices_are_sorted" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_vector v ~name:"update_window_dims" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"inserted_window_dims" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"scatter_dims_to_operand_dims" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_inline v ~name:"index_vector_dim" ~voff:12 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"unique_indices" ~voff:14 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"update_computation_subgraph_index" ~voff:16 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_shift_left_options__142 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_stablehlo_slice_options__143 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"start_indices" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"limit_indices" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         && V.field_vector v ~name:"strides" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         )
+  and table_stablehlo_sort_options__144 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"dimension" ~voff:4 ~required:false ~size:8 ~align:8
+         && V.field_inline v ~name:"is_stable" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"comparator_subgraph_index" ~voff:8 ~required:false ~size:4 ~align:4
+         )
+  and table_stablehlo_transpose_options__145 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"permutation" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:8
+         )
+  and table_stablehlo_while_options__146 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"cond_subgraph_index" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"body_subgraph_index" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_strided_slice_options__147 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"begin_mask" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"end_mask" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"ellipsis_mask" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"new_axis_mask" ~voff:10 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"shrink_axis_mask" ~voff:12 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"offset" ~voff:14 ~required:false ~size:1 ~align:1
+         )
+  and table_sub_graph__148 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector_table v ~name:"tensors" ~voff:4 ~required:false ~off64:false ~vec64:false table_tensor__150
+         && V.field_vector v ~name:"inputs" ~voff:6 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector v ~name:"outputs" ~voff:8 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_vector_table v ~name:"operators" ~voff:10 ~required:false ~off64:false ~vec64:false table_operator__82
+         && V.field_string v ~name:"name" ~voff:12 ~required:false ~off64:false
+         && V.field_inline v ~name:"debug_metadata_index" ~voff:14 ~required:false ~size:4 ~align:4
+         )
+  and table_sub_options__149 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"pot_scale_int16" ~voff:6 ~required:false ~size:1 ~align:1
+         )
+  and table_tensor__150 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"shape" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_inline v ~name:"type_" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"buffer" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_string v ~name:"name" ~voff:10 ~required:false ~off64:false
+         && V.field_table v ~name:"quantization" ~voff:12 ~required:false ~off64:false table_quantization_parameters__89
+         && V.field_inline v ~name:"is_variable" ~voff:14 ~required:false ~size:1 ~align:1
+         && V.field_table v ~name:"sparsity" ~voff:16 ~required:false ~off64:false table_sparsity_parameters__120
+         && V.field_vector v ~name:"shape_signature" ~voff:18 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_inline v ~name:"has_rank" ~voff:20 ~required:false ~size:1 ~align:1
+         && V.field_vector_table v ~name:"variant_tensors" ~voff:22 ~required:false ~off64:false ~vec64:false table_variant_sub_type__166
+         && V.field_inline v ~name:"external_buffer" ~voff:24 ~required:false ~size:4 ~align:4
+         )
+  and table_tensor_map__151 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"name" ~voff:4 ~required:false ~off64:false
+         && V.field_inline v ~name:"tensor_index" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_tile_options__152 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_top_kv2_options__153 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_transpose_conv_options__154 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"padding" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"stride_w" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"stride_h" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"fused_activation_function" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"quantized_bias_type" ~voff:12 ~required:false ~size:1 ~align:1
+         )
+  and table_transpose_options__155 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_uint16_vector__156 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"values" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:2
+         )
+  and table_uint8_vector__157 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"values" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:1
+         )
+  and table_unidirectional_sequence_lstmoptions__158 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"fused_activation_function" ~voff:4 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"cell_clip" ~voff:6 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"proj_clip" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"time_major" ~voff:10 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:12 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"diagonal_recurrent_tensors" ~voff:14 ~required:false ~size:1 ~align:1
+         )
+  and table_unique_options__159 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"idx_out_type" ~voff:4 ~required:false ~size:1 ~align:1
+         )
+  and table_unpack_options__160 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"num" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"axis" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_unsorted_segment_max_options__161 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_unsorted_segment_min_options__162 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_unsorted_segment_prod_options__163 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_unsorted_segment_sum_options__164 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_var_handle_options__165 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_string v ~name:"container" ~voff:4 ~required:false ~off64:false
+         && V.field_string v ~name:"shared_name" ~voff:6 ~required:false ~off64:false
+         )
+  and table_variant_sub_type__166 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_vector v ~name:"shape" ~voff:4 ~required:false ~off64:false ~vec64:false ~elem_size:4
+         && V.field_inline v ~name:"type_" ~voff:6 ~required:false ~size:1 ~align:1
+         && V.field_inline v ~name:"has_rank" ~voff:8 ~required:false ~size:1 ~align:1
+         )
+  and table_where_options__167 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and table_while_options__168 v pos =
+    V.enter_table v pos
+    && V.exit_table v
+         (  V.field_inline v ~name:"cond_subgraph_index" ~voff:4 ~required:false ~size:4 ~align:4
+         && V.field_inline v ~name:"body_subgraph_index" ~voff:6 ~required:false ~size:4 ~align:4
+         )
+  and table_zeros_like_options__169 v pos =
+    V.enter_table v pos
+    && V.exit_table v true
+  and union_builtin_options__170 v tag slot =
+    match tag with
+    | 0L -> V.union_none v slot
+    | 1L -> V.union_table v slot ~variant:"conv2_doptions" table_conv2_doptions__22
+    | 2L -> V.union_table v slot ~variant:"depthwise_conv2_doptions" table_depthwise_conv2_doptions__29
+    | 3L -> V.union_table v slot ~variant:"concat_embeddings_options" table_concat_embeddings_options__20
+    | 4L -> V.union_table v slot ~variant:"lshprojection_options" table_lshprojection_options__59
+    | 5L -> V.union_table v slot ~variant:"pool2_doptions" table_pool2_doptions__87
+    | 6L -> V.union_table v slot ~variant:"svdfoptions" table_svdfoptions__105
+    | 7L -> V.union_table v slot ~variant:"rnnoptions" table_rnnoptions__91
+    | 8L -> V.union_table v slot ~variant:"fully_connected_options" table_fully_connected_options__45
+    | 9L -> V.union_table v slot ~variant:"softmax_options" table_softmax_options__116
+    | 10L -> V.union_table v slot ~variant:"concatenation_options" table_concatenation_options__21
+    | 11L -> V.union_table v slot ~variant:"add_options" table_add_options__3
+    | 12L -> V.union_table v slot ~variant:"l2_norm_options" table_l2_norm_options__58
+    | 13L -> V.union_table v slot ~variant:"local_response_normalization_options" table_local_response_normalization_options__64
+    | 14L -> V.union_table v slot ~variant:"lstmoptions" table_lstmoptions__60
+    | 15L -> V.union_table v slot ~variant:"resize_bilinear_options" table_resize_bilinear_options__99
+    | 16L -> V.union_table v slot ~variant:"call_options" table_call_options__18
+    | 17L -> V.union_table v slot ~variant:"reshape_options" table_reshape_options__98
+    | 18L -> V.union_table v slot ~variant:"skip_gram_options" table_skip_gram_options__114
+    | 19L -> V.union_table v slot ~variant:"space_to_depth_options" table_space_to_depth_options__118
+    | 20L -> V.union_table v slot ~variant:"embedding_lookup_sparse_options" table_embedding_lookup_sparse_options__35
+    | 21L -> V.union_table v slot ~variant:"mul_options" table_mul_options__75
+    | 22L -> V.union_table v slot ~variant:"pad_options" table_pad_options__85
+    | 23L -> V.union_table v slot ~variant:"gather_options" table_gather_options__47
+    | 24L -> V.union_table v slot ~variant:"batch_to_space_ndoptions" table_batch_to_space_ndoptions__8
+    | 25L -> V.union_table v slot ~variant:"space_to_batch_ndoptions" table_space_to_batch_ndoptions__117
+    | 26L -> V.union_table v slot ~variant:"transpose_options" table_transpose_options__155
+    | 27L -> V.union_table v slot ~variant:"reducer_options" table_reducer_options__97
+    | 28L -> V.union_table v slot ~variant:"sub_options" table_sub_options__149
+    | 29L -> V.union_table v slot ~variant:"div_options" table_div_options__33
+    | 30L -> V.union_table v slot ~variant:"squeeze_options" table_squeeze_options__125
+    | 31L -> V.union_table v slot ~variant:"sequence_rnnoptions" table_sequence_rnnoptions__110
+    | 32L -> V.union_table v slot ~variant:"strided_slice_options" table_strided_slice_options__147
+    | 33L -> V.union_table v slot ~variant:"exp_options" table_exp_options__37
+    | 34L -> V.union_table v slot ~variant:"top_kv2_options" table_top_kv2_options__153
+    | 35L -> V.union_table v slot ~variant:"split_options" table_split_options__121
+    | 36L -> V.union_table v slot ~variant:"log_softmax_options" table_log_softmax_options__65
+    | 37L -> V.union_table v slot ~variant:"cast_options" table_cast_options__19
+    | 38L -> V.union_table v slot ~variant:"dequantize_options" table_dequantize_options__30
+    | 39L -> V.union_table v slot ~variant:"maximum_minimum_options" table_maximum_minimum_options__71
+    | 40L -> V.union_table v slot ~variant:"arg_max_options" table_arg_max_options__4
+    | 41L -> V.union_table v slot ~variant:"less_options" table_less_options__63
+    | 42L -> V.union_table v slot ~variant:"neg_options" table_neg_options__77
+    | 43L -> V.union_table v slot ~variant:"pad_v2_options" table_pad_v2_options__86
+    | 44L -> V.union_table v slot ~variant:"greater_options" table_greater_options__50
+    | 45L -> V.union_table v slot ~variant:"greater_equal_options" table_greater_equal_options__49
+    | 46L -> V.union_table v slot ~variant:"less_equal_options" table_less_equal_options__62
+    | 47L -> V.union_table v slot ~variant:"select_options" table_select_options__108
+    | 48L -> V.union_table v slot ~variant:"slice_options" table_slice_options__115
+    | 49L -> V.union_table v slot ~variant:"transpose_conv_options" table_transpose_conv_options__154
+    | 50L -> V.union_table v slot ~variant:"sparse_to_dense_options" table_sparse_to_dense_options__119
+    | 51L -> V.union_table v slot ~variant:"tile_options" table_tile_options__152
+    | 52L -> V.union_table v slot ~variant:"expand_dims_options" table_expand_dims_options__38
+    | 53L -> V.union_table v slot ~variant:"equal_options" table_equal_options__36
+    | 54L -> V.union_table v slot ~variant:"not_equal_options" table_not_equal_options__80
+    | 55L -> V.union_table v slot ~variant:"shape_options" table_shape_options__111
+    | 56L -> V.union_table v slot ~variant:"pow_options" table_pow_options__88
+    | 57L -> V.union_table v slot ~variant:"arg_min_options" table_arg_min_options__5
+    | 58L -> V.union_table v slot ~variant:"fake_quant_options" table_fake_quant_options__41
+    | 59L -> V.union_table v slot ~variant:"pack_options" table_pack_options__84
+    | 60L -> V.union_table v slot ~variant:"logical_or_options" table_logical_or_options__68
+    | 61L -> V.union_table v slot ~variant:"one_hot_options" table_one_hot_options__81
+    | 62L -> V.union_table v slot ~variant:"logical_and_options" table_logical_and_options__66
+    | 63L -> V.union_table v slot ~variant:"logical_not_options" table_logical_not_options__67
+    | 64L -> V.union_table v slot ~variant:"unpack_options" table_unpack_options__160
+    | 65L -> V.union_table v slot ~variant:"floor_div_options" table_floor_div_options__43
+    | 66L -> V.union_table v slot ~variant:"square_options" table_square_options__123
+    | 67L -> V.union_table v slot ~variant:"zeros_like_options" table_zeros_like_options__169
+    | 68L -> V.union_table v slot ~variant:"fill_options" table_fill_options__42
+    | 69L -> V.union_table v slot ~variant:"bidirectional_sequence_lstmoptions" table_bidirectional_sequence_lstmoptions__9
+    | 70L -> V.union_table v slot ~variant:"bidirectional_sequence_rnnoptions" table_bidirectional_sequence_rnnoptions__10
+    | 71L -> V.union_table v slot ~variant:"unidirectional_sequence_lstmoptions" table_unidirectional_sequence_lstmoptions__158
+    | 72L -> V.union_table v slot ~variant:"floor_mod_options" table_floor_mod_options__44
+    | 73L -> V.union_table v slot ~variant:"range_options" table_range_options__93
+    | 74L -> V.union_table v slot ~variant:"resize_nearest_neighbor_options" table_resize_nearest_neighbor_options__100
+    | 75L -> V.union_table v slot ~variant:"leaky_relu_options" table_leaky_relu_options__61
+    | 76L -> V.union_table v slot ~variant:"squared_difference_options" table_squared_difference_options__124
+    | 77L -> V.union_table v slot ~variant:"mirror_pad_options" table_mirror_pad_options__73
+    | 78L -> V.union_table v slot ~variant:"abs_options" table_abs_options__1
+    | 79L -> V.union_table v slot ~variant:"split_voptions" table_split_voptions__122
+    | 80L -> V.union_table v slot ~variant:"unique_options" table_unique_options__159
+    | 81L -> V.union_table v slot ~variant:"reverse_v2_options" table_reverse_v2_options__102
+    | 82L -> V.union_table v slot ~variant:"add_noptions" table_add_noptions__2
+    | 83L -> V.union_table v slot ~variant:"gather_nd_options" table_gather_nd_options__46
+    | 84L -> V.union_table v slot ~variant:"cos_options" table_cos_options__24
+    | 85L -> V.union_table v slot ~variant:"where_options" table_where_options__167
+    | 86L -> V.union_table v slot ~variant:"rank_options" table_rank_options__94
+    | 87L -> V.union_table v slot ~variant:"reverse_sequence_options" table_reverse_sequence_options__101
+    | 88L -> V.union_table v slot ~variant:"matrix_diag_options" table_matrix_diag_options__69
+    | 89L -> V.union_table v slot ~variant:"quantize_options" table_quantize_options__90
+    | 90L -> V.union_table v slot ~variant:"matrix_set_diag_options" table_matrix_set_diag_options__70
+    | 91L -> V.union_table v slot ~variant:"hard_swish_options" table_hard_swish_options__51
+    | 92L -> V.union_table v slot ~variant:"if_options" table_if_options__56
+    | 93L -> V.union_table v slot ~variant:"while_options" table_while_options__168
+    | 94L -> V.union_table v slot ~variant:"depth_to_space_options" table_depth_to_space_options__28
+    | 95L -> V.union_table v slot ~variant:"non_max_suppression_v4_options" table_non_max_suppression_v4_options__78
+    | 96L -> V.union_table v slot ~variant:"non_max_suppression_v5_options" table_non_max_suppression_v5_options__79
+    | 97L -> V.union_table v slot ~variant:"scatter_nd_options" table_scatter_nd_options__106
+    | 98L -> V.union_table v slot ~variant:"select_v2_options" table_select_v2_options__109
+    | 99L -> V.union_table v slot ~variant:"densify_options" table_densify_options__27
+    | 100L -> V.union_table v slot ~variant:"segment_sum_options" table_segment_sum_options__107
+    | 101L -> V.union_table v slot ~variant:"batch_mat_mul_options" table_batch_mat_mul_options__7
+    | 102L -> V.union_table v slot ~variant:"cumsum_options" table_cumsum_options__25
+    | 103L -> V.union_table v slot ~variant:"call_once_options" table_call_once_options__17
+    | 104L -> V.union_table v slot ~variant:"broadcast_to_options" table_broadcast_to_options__14
+    | 105L -> V.union_table v slot ~variant:"rfft2_d_options" table_rfft2_d_options__103
+    | 106L -> V.union_table v slot ~variant:"conv3_doptions" table_conv3_doptions__23
+    | 107L -> V.union_table v slot ~variant:"hashtable_options" table_hashtable_options__54
+    | 108L -> V.union_table v slot ~variant:"hashtable_find_options" table_hashtable_find_options__52
+    | 109L -> V.union_table v slot ~variant:"hashtable_import_options" table_hashtable_import_options__53
+    | 110L -> V.union_table v slot ~variant:"hashtable_size_options" table_hashtable_size_options__55
+    | 111L -> V.union_table v slot ~variant:"var_handle_options" table_var_handle_options__165
+    | 112L -> V.union_table v slot ~variant:"read_variable_options" table_read_variable_options__95
+    | 113L -> V.union_table v slot ~variant:"assign_variable_options" table_assign_variable_options__6
+    | 114L -> V.union_table v slot ~variant:"random_options" table_random_options__92
+    | 115L -> V.union_table v slot ~variant:"bucketize_options" table_bucketize_options__15
+    | 116L -> V.union_table v slot ~variant:"gelu_options" table_gelu_options__48
+    | 117L -> V.union_table v slot ~variant:"dynamic_update_slice_options" table_dynamic_update_slice_options__34
+    | 118L -> V.union_table v slot ~variant:"unsorted_segment_prod_options" table_unsorted_segment_prod_options__163
+    | 119L -> V.union_table v slot ~variant:"unsorted_segment_max_options" table_unsorted_segment_max_options__161
+    | 120L -> V.union_table v slot ~variant:"unsorted_segment_min_options" table_unsorted_segment_min_options__162
+    | 121L -> V.union_table v slot ~variant:"unsorted_segment_sum_options" table_unsorted_segment_sum_options__164
+    | 122L -> V.union_table v slot ~variant:"atan2_options" table_atan2_options__0
+    | 123L -> V.union_table v slot ~variant:"sign_options" table_sign_options__112
+    | 124L -> V.union_table v slot ~variant:"bitcast_options" table_bitcast_options__11
+    | 125L -> V.union_table v slot ~variant:"bitwise_xor_options" table_bitwise_xor_options__12
+    | 126L -> V.union_table v slot ~variant:"right_shift_options" table_right_shift_options__104
+    | _ -> V.union_unknown v tag slot
+  and union_builtin_options2__171 v tag slot =
+    match tag with
+    | 0L -> V.union_none v slot
+    | 1L -> V.union_table v slot ~variant:"stablehlo_concatenate_options" table_stablehlo_concatenate_options__130
+    | 2L -> V.union_table v slot ~variant:"stablehlo_broadcast_in_dim_options" table_stablehlo_broadcast_in_dim_options__127
+    | 3L -> V.union_table v slot ~variant:"stablehlo_slice_options" table_stablehlo_slice_options__143
+    | 4L -> V.union_table v slot ~variant:"stablehlo_convolution_options" table_stablehlo_convolution_options__131
+    | 5L -> V.union_table v slot ~variant:"stablehlo_custom_call_options" table_stablehlo_custom_call_options__132
+    | 6L -> V.union_table v slot ~variant:"stablehlo_reduce_options" table_stablehlo_reduce_options__138
+    | 7L -> V.union_table v slot ~variant:"stablehlo_scatter_options" table_stablehlo_scatter_options__141
+    | 8L -> V.union_table v slot ~variant:"stablehlo_compare_options" table_stablehlo_compare_options__129
+    | 9L -> V.union_table v slot ~variant:"stablehlo_dynamic_slice_options" table_stablehlo_dynamic_slice_options__134
+    | 10L -> V.union_table v slot ~variant:"stablehlo_pad_options" table_stablehlo_pad_options__137
+    | 11L -> V.union_table v slot ~variant:"stablehlo_iota_options" table_stablehlo_iota_options__136
+    | 12L -> V.union_table v slot ~variant:"stablehlo_dot_general_options" table_stablehlo_dot_general_options__133
+    | 13L -> V.union_table v slot ~variant:"stablehlo_reduce_window_options" table_stablehlo_reduce_window_options__139
+    | 14L -> V.union_table v slot ~variant:"stablehlo_sort_options" table_stablehlo_sort_options__144
+    | 15L -> V.union_table v slot ~variant:"stablehlo_while_options" table_stablehlo_while_options__146
+    | 16L -> V.union_table v slot ~variant:"stablehlo_gather_options" table_stablehlo_gather_options__135
+    | 17L -> V.union_table v slot ~variant:"stablehlo_transpose_options" table_stablehlo_transpose_options__145
+    | 18L -> V.union_table v slot ~variant:"dilate_options" table_dilate_options__31
+    | 19L -> V.union_table v slot ~variant:"stablehlo_rng_bit_generator_options" table_stablehlo_rng_bit_generator_options__140
+    | 20L -> V.union_table v slot ~variant:"reduce_window_options" table_reduce_window_options__96
+    | 21L -> V.union_table v slot ~variant:"stable_hlocomposite_options" table_stable_hlocomposite_options__126
+    | 22L -> V.union_table v slot ~variant:"stablehlo_shift_left_options" table_stablehlo_shift_left_options__142
+    | 23L -> V.union_table v slot ~variant:"stablehlo_case_options" table_stablehlo_case_options__128
+    | _ -> V.union_unknown v tag slot
+  and union_quantization_details__172 v tag slot =
+    match tag with
+    | 0L -> V.union_none v slot
+    | 1L -> V.union_table v slot ~variant:"custom_quantization" table_custom_quantization__26
+    | 2L -> V.union_table v slot ~variant:"blockwise_quantization" table_blockwise_quantization__13
+    | 3L -> V.union_table v slot ~variant:"multi_axis_quantization" table_multi_axis_quantization__76
+    | _ -> V.union_unknown v tag slot
+  and union_sparse_index_vector__173 v tag slot =
+    match tag with
+    | 0L -> V.union_none v slot
+    | 1L -> V.union_table v slot ~variant:"int32_vector" table_int32_vector__57
+    | 2L -> V.union_table v slot ~variant:"uint16_vector" table_uint16_vector__156
+    | 3L -> V.union_table v slot ~variant:"uint8_vector" table_uint8_vector__157
+    | _ -> V.union_unknown v tag slot
 end
 
 module rec Tflite : sig
@@ -5913,6 +7011,8 @@ module rec Tflite : sig
     val identifier : string option
     val has_identifier : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> bool
     val root : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> t Rt.root
+    val verify : ?options:Flatbuffers.Verifier.options -> ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> (unit, Flatbuffers.Verifier.error) result
+    val root_verified : ?options:Flatbuffers.Verifier.options -> ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> (t Rt.root, Flatbuffers.Verifier.error) result
     val finish_buf : ?size_prefixed:bool -> 'a Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a
 
     val version : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.UInt.t
@@ -18903,6 +20003,8 @@ end = struct
     val identifier : string option
     val has_identifier : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> bool
     val root : ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> t Rt.root
+    val verify : ?options:Flatbuffers.Verifier.options -> ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> (unit, Flatbuffers.Verifier.error) result
+    val root_verified : ?options:Flatbuffers.Verifier.options -> ?size_prefixed:bool -> ?off:int -> 'b Flatbuffers.Primitives.t -> 'b -> (t Rt.root, Flatbuffers.Verifier.error) result
     val finish_buf : ?size_prefixed:bool -> 'a Flatbuffers.Primitives.t -> Rt.Builder.t -> t Rt.wip -> 'a
 
     val version : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.UInt.t
@@ -18959,6 +20061,12 @@ end = struct
     let identifier = Some "TFL3"
     let has_identifier ?(size_prefixed = false) ?(off = 0) p b = Rt.get_identifier p b ~size_prefixed ~off = Option.get identifier
     let[@inline] root ?(size_prefixed = false) ?(off = 0) p b = Rt.get_root p b ~size_prefixed ~off
+    let verify ?options ?size_prefixed ?off p b =
+      Flatbuffers.Verifier.verify_root ?options ?size_prefixed ?off ?identifier p b Verify.table_model__74
+    let root_verified ?options ?size_prefixed ?off p b =
+      match verify ?options ?size_prefixed ?off p b with
+      | Ok () -> Ok (root ?size_prefixed ?off p b)
+      | Error e -> Error e
     let finish_buf ?(size_prefixed = false) = Rt.Builder.finish ?identifier ~size_prefixed
 
     let[@inline] version b o = Rt.UInt.(read_table_default b o 4 ~default:(of_default 0L))
