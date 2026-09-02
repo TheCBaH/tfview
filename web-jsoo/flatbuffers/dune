@@ -14,10 +14,54 @@
  (files %{workspace_root}/modules/flatbuffers/ocaml/lib/runtime.mli))
 
 (copy_files
- (files %{workspace_root}/modules/flatbuffers/ocaml/lib/util.{ml,mli}))
+ (files %{workspace_root}/modules/flatbuffers/ocaml/lib/util.mli))
+
+(copy_files
+ (files %{workspace_root}/modules/flatbuffers/ocaml/lib/flexbuffers.{ml,mli}))
+
+(copy_files
+ (files %{workspace_root}/modules/flatbuffers/ocaml/lib/verifier.mli))
 
 (copy_files
  (files %{workspace_root}/modules/flatbuffers/ocaml/js_dataview.mli))
+
+(rule
+ (target util.ml)
+ (deps
+  (:src %{workspace_root}/modules/flatbuffers/ocaml/lib/util.ml))
+ (action
+  (run
+   %{bin:cppo}
+   -D
+   JSDATAVIEW
+   -D
+   "TARGET_INT_SIZE 32"
+   -I
+   .
+   -V
+   OCAML:%{ocaml_version}
+   %{src}
+   -o
+   %{target})))
+
+(rule
+ (target verifier.ml)
+ (deps
+  (:src %{workspace_root}/modules/flatbuffers/ocaml/lib/verifier.ml))
+ (action
+  (run
+   %{bin:cppo}
+   -D
+   JSDATAVIEW
+   -D
+   "TARGET_INT_SIZE 32"
+   -I
+   .
+   -V
+   OCAML:%{ocaml_version}
+   %{src}
+   -o
+   %{target})))
 
 (rule
  (target primitives.ml)
