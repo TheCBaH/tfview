@@ -168,11 +168,12 @@ module Union = struct
     | 23L when Option.is_some stablehlo_case_options -> Option.get stablehlo_case_options (Rt.Ref.read_table b o i)
     | _ -> default t
 
-  let read_table_quantization_details__2 ?none ?custom_quantization ?blockwise_quantization ~default b i t o =
+  let read_table_quantization_details__2 ?none ?custom_quantization ?blockwise_quantization ?multi_axis_quantization ~default b i t o =
     match Rt.UType.to_default t with
     | 0L when Option.is_some none -> Option.get none
     | 1L when Option.is_some custom_quantization -> Option.get custom_quantization (Rt.Ref.read_table b o i)
     | 2L when Option.is_some blockwise_quantization -> Option.get blockwise_quantization (Rt.Ref.read_table b o i)
+    | 3L when Option.is_some multi_axis_quantization -> Option.get multi_axis_quantization (Rt.Ref.read_table b o i)
     | _ -> default t
 
   let read_table_sparse_index_vector__3 ?none ?int32_vector ?uint16_vector ?uint8_vector ~default b i t o =
@@ -1535,6 +1536,41 @@ module rec Tflite : sig
     type obj = {
       name : string option;
       buffer : Rt.UInt.t;
+    }
+
+    val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
+    val pack : Rt.Builder.t -> obj -> t Rt.wip
+  end
+
+  (* Table tflite.MultiAxisQuantization (//schema.fbs) *)
+  and MultiAxisQuantization : sig
+    type t
+
+    module Vector : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    module Vector64 : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val quantized_dimensions : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
+
+    module Builder : sig
+      type t
+
+      val start : Rt.Builder.t -> t
+      val finish : t -> MultiAxisQuantization.t Rt.wip
+      val add_scales : Rt.Int.t -> t -> t
+      val add_zero_points : Rt.Int.t -> t -> t
+      val add_block_size : Rt.Int.t -> t -> t
+      val add_quantized_dimensions : Rt.Int.Vector.t Rt.wip -> t -> t
+    end
+
+    type obj = {
+      scales : Rt.Int.t;
+      zero_points : Rt.Int.t;
+      block_size : Rt.Int.t;
+      quantized_dimensions : Rt.Int.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -4050,6 +4086,7 @@ module rec Tflite : sig
     val none : t
     val custom_quantization : t
     val blockwise_quantization : t
+    val multi_axis_quantization : t
 
     val of_underlying : Rt.UType.t -> t
     val to_string : t -> string
@@ -4058,6 +4095,7 @@ module rec Tflite : sig
       | `None_
       | `CustomQuantization of CustomQuantization.obj
       | `BlockwiseQuantization of BlockwiseQuantization.obj
+      | `MultiAxisQuantization of MultiAxisQuantization.obj
     ]
   end
 
@@ -4190,6 +4228,8 @@ module rec Tflite : sig
     val bfloat16 : t
     val int2 : t
     val uint4 : t
+    val float8_e4_m3_fn : t
+    val float8_e5_m2 : t
 
     val of_underlying : Rt.Byte.t -> t
     val to_string : t -> string
@@ -4942,7 +4982,7 @@ module rec Tflite : sig
     val scale : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Float.Vector.t) Rt.fbopt
     val zero_point : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Long.Vector.t) Rt.fbopt
     val details_type : 'b Rt.buf -> ('b, t) Rt.fb -> QuantizationDetails.t
-    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
+    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> ?multi_axis_quantization:(('b, MultiAxisQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
     val quantized_dimension : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
 
     module Builder : sig
@@ -4956,6 +4996,7 @@ module rec Tflite : sig
       val add_zero_point : Rt.Long.Vector.t Rt.wip -> t -> t
       val add_details_custom_quantization : CustomQuantization.t Rt.wip -> t -> t
       val add_details_blockwise_quantization : BlockwiseQuantization.t Rt.wip -> t -> t
+      val add_details_multi_axis_quantization : MultiAxisQuantization.t Rt.wip -> t -> t
       val add_quantized_dimension : Rt.Int.t -> t -> t
     end
 
@@ -8706,6 +8747,86 @@ end = struct
       let t = Builder.start b__ in
       let t = match name' with None -> t | Some off -> Builder.add_name off t in
       let t = Builder.add_buffer obj.buffer t in
+      Builder.finish t
+  end
+
+  (* Table tflite.MultiAxisQuantization (//schema.fbs) *)
+  and MultiAxisQuantization : sig
+    type t
+
+    module Vector : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    module Vector64 : Rt.VectorS with type 'b elt := ('b, t) Rt.fb and type builder_elt := t Rt.wip
+
+    val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val quantized_dimensions : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
+
+    module Builder : sig
+      type t
+
+      val start : Rt.Builder.t -> t
+      val finish : t -> MultiAxisQuantization.t Rt.wip
+      val add_scales : Rt.Int.t -> t -> t
+      val add_zero_points : Rt.Int.t -> t -> t
+      val add_block_size : Rt.Int.t -> t -> t
+      val add_quantized_dimensions : Rt.Int.Vector.t Rt.wip -> t -> t
+    end
+
+    type obj = {
+      scales : Rt.Int.t;
+      zero_points : Rt.Int.t;
+      block_size : Rt.Int.t;
+      quantized_dimensions : Rt.Int.t array;
+    }
+
+    val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
+    val pack : Rt.Builder.t -> obj -> t Rt.wip
+  end = struct
+    type t
+
+    module Vector = Rt.Ref.Vector
+
+    module Vector64 = Rt.Ref64.Vector
+
+    let[@inline] scales b o = Rt.Int.(read_table_default b o 4 ~default:(of_default 0L))
+    let[@inline] zero_points b o = Rt.Int.(read_table_default b o 6 ~default:(of_default 0L))
+    let[@inline] block_size b o = Rt.Int.(read_table_default b o 8 ~default:(of_default 0L))
+    let[@inline] quantized_dimensions b o = Rt.Ref.read_table_opt b o 10
+
+    module Builder = struct
+      type t = Rt.Builder.t
+
+      let start b = Rt.Builder.start_table b ~n_fields:4
+      let finish b = Rt.Builder.end_table b
+      let add_scales = Rt.Int.(push_slot_default 0 ~default:(of_default 0L))
+      let add_zero_points = Rt.Int.(push_slot_default 1 ~default:(of_default 0L))
+      let add_block_size = Rt.Int.(push_slot_default 2 ~default:(of_default 0L))
+      let add_quantized_dimensions = Rt.Ref.push_slot 3
+    end
+
+    type obj = {
+      scales : Rt.Int.t;
+      zero_points : Rt.Int.t;
+      block_size : Rt.Int.t;
+      quantized_dimensions : Rt.Int.t array;
+    }
+
+    let unpack b__ o__ : obj = {
+      scales = scales b__ o__;
+      zero_points = zero_points b__ o__;
+      block_size = block_size b__ o__;
+      quantized_dimensions = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.Int.Vector.to_array b__ v) (quantized_dimensions b__ o__);
+    }
+
+    let pack b__ (obj : obj) =
+      let quantized_dimensions' = Rt.Int.Vector.create b__ obj.quantized_dimensions in
+      let t = Builder.start b__ in
+      let t = Builder.add_scales obj.scales t in
+      let t = Builder.add_zero_points obj.zero_points t in
+      let t = Builder.add_block_size obj.block_size t in
+      let t = Builder.add_quantized_dimensions quantized_dimensions' t in
       Builder.finish t
   end
 
@@ -14306,6 +14427,7 @@ end = struct
     val none : t
     val custom_quantization : t
     val blockwise_quantization : t
+    val multi_axis_quantization : t
 
     val of_underlying : Rt.UType.t -> t
     val to_string : t -> string
@@ -14314,6 +14436,7 @@ end = struct
       | `None_
       | `CustomQuantization of CustomQuantization.obj
       | `BlockwiseQuantization of BlockwiseQuantization.obj
+      | `MultiAxisQuantization of MultiAxisQuantization.obj
     ]
   end = struct
     type t = Rt.UType.t
@@ -14321,6 +14444,7 @@ end = struct
     let none = Rt.UType.of_default 0L
     let custom_quantization = Rt.UType.of_default 1L
     let blockwise_quantization = Rt.UType.of_default 2L
+    let multi_axis_quantization = Rt.UType.of_default 3L
 
     let of_underlying x = x
 
@@ -14329,12 +14453,14 @@ end = struct
       | 0L -> "none"
       | 1L -> "custom_quantization"
       | 2L -> "blockwise_quantization"
+      | 3L -> "multi_axis_quantization"
       | x -> "<tflite.QuantizationDetails: " ^ (Int64.to_string x) ^ ">"
 
     type obj = [
       | `None_
       | `CustomQuantization of CustomQuantization.obj
       | `BlockwiseQuantization of BlockwiseQuantization.obj
+      | `MultiAxisQuantization of MultiAxisQuantization.obj
     ]
   end
 
@@ -14599,6 +14725,8 @@ end = struct
     val bfloat16 : t
     val int2 : t
     val uint4 : t
+    val float8_e4_m3_fn : t
+    val float8_e5_m2 : t
 
     val of_underlying : Rt.Byte.t -> t
     val to_string : t -> string
@@ -14629,6 +14757,8 @@ end = struct
     let bfloat16 = Rt.Byte.of_default 18L
     let int2 = Rt.Byte.of_default 19L
     let uint4 = Rt.Byte.of_default 20L
+    let float8_e4_m3_fn = Rt.Byte.of_default 21L
+    let float8_e5_m2 = Rt.Byte.of_default 22L
 
     let of_underlying x = x
 
@@ -14655,6 +14785,8 @@ end = struct
       | 18L -> "bfloat16"
       | 19L -> "int2"
       | 20L -> "uint4"
+      | 21L -> "float8_e4_m3_fn"
+      | 22L -> "float8_e5_m2"
       | x -> "<tflite.TensorType: " ^ (Int64.to_string x) ^ ">"
 
     module Vector = Rt.Byte.Vector
@@ -16314,7 +16446,7 @@ end = struct
     val scale : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Float.Vector.t) Rt.fbopt
     val zero_point : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Long.Vector.t) Rt.fbopt
     val details_type : 'b Rt.buf -> ('b, t) Rt.fb -> QuantizationDetails.t
-    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
+    val details : ?none:'a -> ?custom_quantization:(('b, CustomQuantization.t) Rt.fb -> 'a) -> ?blockwise_quantization:(('b, BlockwiseQuantization.t) Rt.fb -> 'a) -> ?multi_axis_quantization:(('b, MultiAxisQuantization.t) Rt.fb -> 'a) -> default:(QuantizationDetails.t -> 'a) -> 'b Rt.buf -> ('b, t) Rt.fb -> 'a
     val quantized_dimension : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
 
     module Builder : sig
@@ -16328,6 +16460,7 @@ end = struct
       val add_zero_point : Rt.Long.Vector.t Rt.wip -> t -> t
       val add_details_custom_quantization : CustomQuantization.t Rt.wip -> t -> t
       val add_details_blockwise_quantization : BlockwiseQuantization.t Rt.wip -> t -> t
+      val add_details_multi_axis_quantization : MultiAxisQuantization.t Rt.wip -> t -> t
       val add_quantized_dimension : Rt.Int.t -> t -> t
     end
 
@@ -16354,7 +16487,7 @@ end = struct
     let[@inline] scale b o = Rt.Ref.read_table_opt b o 8
     let[@inline] zero_point b o = Rt.Ref.read_table_opt b o 10
     let[@inline] details_type b o = Rt.UType.(read_table_default b o 12 ~default:(of_default 0L))
-    let[@inline] details ?none ?custom_quantization ?blockwise_quantization ~default b o = Union.read_table_quantization_details__2 b 14 (details_type b o) ?none ?custom_quantization ?blockwise_quantization ~default o
+    let[@inline] details ?none ?custom_quantization ?blockwise_quantization ?multi_axis_quantization ~default b o = Union.read_table_quantization_details__2 b 14 (details_type b o) ?none ?custom_quantization ?blockwise_quantization ?multi_axis_quantization ~default o
     let[@inline] quantized_dimension b o = Rt.Int.(read_table_default b o 16 ~default:(of_default 0L))
 
     module Builder = struct
@@ -16368,6 +16501,7 @@ end = struct
       let add_zero_point = Rt.Ref.push_slot 3
       let add_details_custom_quantization = Rt.Ref.push_union 4 5 QuantizationDetails.custom_quantization
       let add_details_blockwise_quantization = Rt.Ref.push_union 4 5 QuantizationDetails.blockwise_quantization
+      let add_details_multi_axis_quantization = Rt.Ref.push_union 4 5 QuantizationDetails.multi_axis_quantization
       let add_quantized_dimension = Rt.Int.(push_slot_default 6 ~default:(of_default 0L))
     end
 
@@ -16385,7 +16519,7 @@ end = struct
       max = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.Float.Vector.to_array b__ v) (max b__ o__);
       scale = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.Float.Vector.to_array b__ v) (scale b__ o__);
       zero_point = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.Long.Vector.to_array b__ v) (zero_point b__ o__);
-      details = details ~none:`None_ ~custom_quantization:(fun x -> `CustomQuantization (CustomQuantization.unpack b__ x)) ~blockwise_quantization:(fun x -> `BlockwiseQuantization (BlockwiseQuantization.unpack b__ x)) ~default:(fun _ -> `None_) b__ o__;
+      details = details ~none:`None_ ~custom_quantization:(fun x -> `CustomQuantization (CustomQuantization.unpack b__ x)) ~blockwise_quantization:(fun x -> `BlockwiseQuantization (BlockwiseQuantization.unpack b__ x)) ~multi_axis_quantization:(fun x -> `MultiAxisQuantization (MultiAxisQuantization.unpack b__ x)) ~default:(fun _ -> `None_) b__ o__;
       quantized_dimension = quantized_dimension b__ o__;
     }
 
@@ -16398,6 +16532,7 @@ end = struct
         | `None_ -> None
         | `CustomQuantization x -> Some (`CustomQuantization, CustomQuantization.pack b__ x)
         | `BlockwiseQuantization x -> Some (`BlockwiseQuantization, BlockwiseQuantization.pack b__ x)
+        | `MultiAxisQuantization x -> Some (`MultiAxisQuantization, MultiAxisQuantization.pack b__ x)
       in
       let t = Builder.start b__ in
       let t = Builder.add_min min' t in
@@ -16408,6 +16543,7 @@ end = struct
         | None -> t
         | Some (`CustomQuantization, off) -> Builder.add_details_custom_quantization off t
         | Some (`BlockwiseQuantization, off) -> Builder.add_details_blockwise_quantization off t
+        | Some (`MultiAxisQuantization, off) -> Builder.add_details_multi_axis_quantization off t
       in
       let t = Builder.add_quantized_dimension obj.quantized_dimension t in
       Builder.finish t
