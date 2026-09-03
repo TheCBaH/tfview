@@ -88,7 +88,11 @@ let tensor_metadata b tensors tensor_idx =
 
 let builtin_options_attrs b op =
   let attrs = ref [] in
-  let add k v = attrs := ME.KeyValue.create ~key:k ~value:v :: !attrs in
+  let add k v =
+    attrs :=
+      ME.NodeAttribute.create ~key:k ~value:(ME.NodeAttributeValue.Str v)
+      :: !attrs
+  in
   let add_activation a =
     if a <> ActivationFunctionType.none then
       add "activation" (ActivationFunctionType.to_string a)
