@@ -446,6 +446,6 @@ let model_to_graph_with prim data =
         List.rev !graphs)
       (Model.subgraphs b model)
   in
-  ME.GraphCollection.create ~label:description ~graphs
+  ME.GraphCollection.create ~label:description ~graphs ()
 
 let model_to_graph data = model_to_graph_with Flatbuffers.Primitives.Bytes data
