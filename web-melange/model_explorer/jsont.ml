@@ -73,7 +73,7 @@ module Object = struct
   end
 
   let case_mem (name : string) (tag_t : 'tag t) ~enc:(accessor : 'o -> 'o)
-      ~enc_case:(enc_case : 'o -> ('tag, 'o) Case.value)
+      ~(enc_case : 'o -> ('tag, 'o) Case.value)
       (_cases : ('tag, 'o) Case.t list) (m : ('o, 'o -> 'b) map) : ('o, 'b) map
       =
     {
@@ -85,7 +85,6 @@ module Object = struct
             | Some dict -> Array.to_list (Js.Dict.entries dict)
             | None -> []
           in
-          m.encs o
-          @ ((name, tag_t case_value.Case.value_tag) :: payload_fields));
+          m.encs o @ ((name, tag_t case_value.Case.value_tag) :: payload_fields));
     }
 end
