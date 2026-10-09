@@ -1,6 +1,6 @@
 TIME := time -f '  %U user  %e wall'
 
-SCHEMA := modules/tflite-micro/tensorflow/compiler/mlir/lite/schema/schema.fbs
+SCHEMA := modules/tflite-micro/tensorflow/lite/schema/schema.fbs
 FLATC := modules/flatbuffers/flatc.ocaml
 MODEL_DIR := models
 MODEL := $(MODEL_DIR)/mobilenet_v1_1.0_224.tflite
