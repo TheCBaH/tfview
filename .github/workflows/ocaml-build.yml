@@ -27,7 +27,11 @@ jobs:
         ${{ env.EXEC }} bash -c '. /etc/bash.bashrc && sudo OPAMROOT=$OPAMROOT make deps'
     - name: check generated schema
       run: |
-        ${{ env.EXEC }} make generate-check
+        ${{ env.EXEC }} make generate
+    - uses: actions/upload-artifact@v4
+      with:
+        name: gen
+        path: lib/tflite_schema/tflite_schema.ml*
     - name: check formatting
       run: |
         ${{ env.EXEC }} make fmt-check
