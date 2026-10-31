@@ -256,6 +256,7 @@ module Verify = struct
          (  V.field_inline v ~name:"scales" ~voff:4 ~required:false ~size:4 ~align:4
          && V.field_inline v ~name:"zero_points" ~voff:6 ~required:false ~size:4 ~align:4
          && V.field_inline v ~name:"block_size" ~voff:8 ~required:false ~size:4 ~align:4
+         && V.field_vector v ~name:"block_shape" ~voff:10 ~required:false ~off64:false ~vec64:false ~elem_size:4
          )
   and table_broadcast_to_options__14 v pos =
     V.enter_table v pos
@@ -432,6 +433,7 @@ module Verify = struct
          && V.field_inline v ~name:"keep_num_dims" ~voff:8 ~required:false ~size:1 ~align:1
          && V.field_inline v ~name:"asymmetric_quantize_inputs" ~voff:10 ~required:false ~size:1 ~align:1
          && V.field_inline v ~name:"quantized_bias_type" ~voff:12 ~required:false ~size:1 ~align:1
+         && V.field_vector v ~name:"quant_spec" ~voff:14 ~required:false ~off64:false ~vec64:false ~elem_size:1
          )
   and table_gather_nd_options__46 v pos =
     V.enter_table v pos
@@ -1481,6 +1483,7 @@ module rec Tflite : sig
     val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_shape : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -1490,12 +1493,14 @@ module rec Tflite : sig
       val add_scales : Rt.Int.t -> t -> t
       val add_zero_points : Rt.Int.t -> t -> t
       val add_block_size : Rt.Int.t -> t -> t
+      val add_block_shape : Rt.Int.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
       scales : Rt.Int.t;
       zero_points : Rt.Int.t;
       block_size : Rt.Int.t;
+      block_shape : Rt.Int.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -6483,6 +6488,7 @@ module rec Tflite : sig
     val keep_num_dims : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val asymmetric_quantize_inputs : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val quantized_bias_type : 'b Rt.buf -> ('b, t) Rt.fb -> TensorType.t
+    val quant_spec : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.UByte.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -6494,6 +6500,7 @@ module rec Tflite : sig
       val add_keep_num_dims : Rt.Bool.t -> t -> t
       val add_asymmetric_quantize_inputs : Rt.Bool.t -> t -> t
       val add_quantized_bias_type : TensorType.t -> t -> t
+      val add_quant_spec : Rt.UByte.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
@@ -6502,6 +6509,7 @@ module rec Tflite : sig
       keep_num_dims : Rt.Bool.t;
       asymmetric_quantize_inputs : Rt.Bool.t;
       quantized_bias_type : TensorType.t;
+      quant_spec : Rt.UByte.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -7443,6 +7451,7 @@ end = struct
     val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_shape : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -7452,12 +7461,14 @@ end = struct
       val add_scales : Rt.Int.t -> t -> t
       val add_zero_points : Rt.Int.t -> t -> t
       val add_block_size : Rt.Int.t -> t -> t
+      val add_block_shape : Rt.Int.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
       scales : Rt.Int.t;
       zero_points : Rt.Int.t;
       block_size : Rt.Int.t;
+      block_shape : Rt.Int.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -7472,34 +7483,40 @@ end = struct
     let[@inline] scales b o = Rt.Int.(read_table_default b o 4 ~default:(of_default 0L))
     let[@inline] zero_points b o = Rt.Int.(read_table_default b o 6 ~default:(of_default 0L))
     let[@inline] block_size b o = Rt.Int.(read_table_default b o 8 ~default:(of_default 0L))
+    let[@inline] block_shape b o = Rt.Ref.read_table_opt b o 10
 
     module Builder = struct
       type t = Rt.Builder.t
 
-      let start b = Rt.Builder.start_table b ~n_fields:3
+      let start b = Rt.Builder.start_table b ~n_fields:4
       let finish b = Rt.Builder.end_table b
       let add_scales = Rt.Int.(push_slot_default 0 ~default:(of_default 0L))
       let add_zero_points = Rt.Int.(push_slot_default 1 ~default:(of_default 0L))
       let add_block_size = Rt.Int.(push_slot_default 2 ~default:(of_default 0L))
+      let add_block_shape = Rt.Ref.push_slot 3
     end
 
     type obj = {
       scales : Rt.Int.t;
       zero_points : Rt.Int.t;
       block_size : Rt.Int.t;
+      block_shape : Rt.Int.t array;
     }
 
     let unpack b__ o__ : obj = {
       scales = scales b__ o__;
       zero_points = zero_points b__ o__;
       block_size = block_size b__ o__;
+      block_shape = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.Int.Vector.to_array b__ v) (block_shape b__ o__);
     }
 
     let pack b__ (obj : obj) =
+      let block_shape' = Rt.Int.Vector.create b__ obj.block_shape in
       let t = Builder.start b__ in
       let t = Builder.add_scales obj.scales t in
       let t = Builder.add_zero_points obj.zero_points t in
       let t = Builder.add_block_size obj.block_size t in
+      let t = Builder.add_block_shape block_shape' t in
       Builder.finish t
   end
 
@@ -18508,6 +18525,7 @@ end = struct
     val keep_num_dims : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val asymmetric_quantize_inputs : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val quantized_bias_type : 'b Rt.buf -> ('b, t) Rt.fb -> TensorType.t
+    val quant_spec : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.UByte.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -18519,6 +18537,7 @@ end = struct
       val add_keep_num_dims : Rt.Bool.t -> t -> t
       val add_asymmetric_quantize_inputs : Rt.Bool.t -> t -> t
       val add_quantized_bias_type : TensorType.t -> t -> t
+      val add_quant_spec : Rt.UByte.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
@@ -18527,6 +18546,7 @@ end = struct
       keep_num_dims : Rt.Bool.t;
       asymmetric_quantize_inputs : Rt.Bool.t;
       quantized_bias_type : TensorType.t;
+      quant_spec : Rt.UByte.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -18543,17 +18563,19 @@ end = struct
     let[@inline] keep_num_dims b o = Rt.Bool.(read_table_default b o 8 ~default:(of_default false))
     let[@inline] asymmetric_quantize_inputs b o = Rt.Bool.(read_table_default b o 10 ~default:(of_default false))
     let[@inline] quantized_bias_type b o = Rt.Byte.(read_table_default b o 12 ~default:(of_default 0L))
+    let[@inline] quant_spec b o = Rt.Ref.read_table_opt b o 14
 
     module Builder = struct
       type t = Rt.Builder.t
 
-      let start b = Rt.Builder.start_table b ~n_fields:5
+      let start b = Rt.Builder.start_table b ~n_fields:6
       let finish b = Rt.Builder.end_table b
       let add_fused_activation_function = Rt.Byte.(push_slot_default 0 ~default:(of_default 0L))
       let add_weights_format = Rt.Byte.(push_slot_default 1 ~default:(of_default 0L))
       let add_keep_num_dims = Rt.Bool.(push_slot_default 2 ~default:(of_default false))
       let add_asymmetric_quantize_inputs = Rt.Bool.(push_slot_default 3 ~default:(of_default false))
       let add_quantized_bias_type = Rt.Byte.(push_slot_default 4 ~default:(of_default 0L))
+      let add_quant_spec = Rt.Ref.push_slot 5
     end
 
     type obj = {
@@ -18562,6 +18584,7 @@ end = struct
       keep_num_dims : Rt.Bool.t;
       asymmetric_quantize_inputs : Rt.Bool.t;
       quantized_bias_type : TensorType.t;
+      quant_spec : Rt.UByte.t array;
     }
 
     let unpack b__ o__ : obj = {
@@ -18570,15 +18593,18 @@ end = struct
       keep_num_dims = keep_num_dims b__ o__;
       asymmetric_quantize_inputs = asymmetric_quantize_inputs b__ o__;
       quantized_bias_type = quantized_bias_type b__ o__;
+      quant_spec = Rt.Option.fold ~none:[||] ~some:(fun v -> Rt.UByte.Vector.to_array b__ v) (quant_spec b__ o__);
     }
 
     let pack b__ (obj : obj) =
+      let quant_spec' = Rt.UByte.Vector.create b__ obj.quant_spec in
       let t = Builder.start b__ in
       let t = Builder.add_fused_activation_function obj.fused_activation_function t in
       let t = Builder.add_weights_format obj.weights_format t in
       let t = Builder.add_keep_num_dims obj.keep_num_dims t in
       let t = Builder.add_asymmetric_quantize_inputs obj.asymmetric_quantize_inputs t in
       let t = Builder.add_quantized_bias_type obj.quantized_bias_type t in
+      let t = Builder.add_quant_spec quant_spec' t in
       Builder.finish t
   end
 

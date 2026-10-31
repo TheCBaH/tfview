@@ -204,6 +204,7 @@ module rec Tflite : sig
     val scales : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val zero_points : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
     val block_size : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Int.t
+    val block_shape : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.Int.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -213,12 +214,14 @@ module rec Tflite : sig
       val add_scales : Rt.Int.t -> t -> t
       val add_zero_points : Rt.Int.t -> t -> t
       val add_block_size : Rt.Int.t -> t -> t
+      val add_block_shape : Rt.Int.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
       scales : Rt.Int.t;
       zero_points : Rt.Int.t;
       block_size : Rt.Int.t;
+      block_shape : Rt.Int.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
@@ -5206,6 +5209,7 @@ module rec Tflite : sig
     val keep_num_dims : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val asymmetric_quantize_inputs : 'b Rt.buf -> ('b, t) Rt.fb -> Rt.Bool.t
     val quantized_bias_type : 'b Rt.buf -> ('b, t) Rt.fb -> TensorType.t
+    val quant_spec : 'b Rt.buf -> ('b, t) Rt.fb -> ('b, Rt.UByte.Vector.t) Rt.fbopt
 
     module Builder : sig
       type t
@@ -5217,6 +5221,7 @@ module rec Tflite : sig
       val add_keep_num_dims : Rt.Bool.t -> t -> t
       val add_asymmetric_quantize_inputs : Rt.Bool.t -> t -> t
       val add_quantized_bias_type : TensorType.t -> t -> t
+      val add_quant_spec : Rt.UByte.Vector.t Rt.wip -> t -> t
     end
 
     type obj = {
@@ -5225,6 +5230,7 @@ module rec Tflite : sig
       keep_num_dims : Rt.Bool.t;
       asymmetric_quantize_inputs : Rt.Bool.t;
       quantized_bias_type : TensorType.t;
+      quant_spec : Rt.UByte.t array;
     }
 
     val unpack : 'b Rt.buf -> ('b, t) Rt.fb -> obj
